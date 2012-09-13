@@ -23,17 +23,43 @@ body {
 
 .extent-chart {
     border: 1px solid black;
-    margin-right: 2px;
 }
 
 .extent-chart rect {
-    stroke: white;
 }
 
-.extent-chart rect.bsonSize {
+.extent-summary {
+    border: 1px solid black;
+    margin-right: 2px;
+}
+
+rect.bsonSize {
     fill: steelblue;
 }
 
-.extent-chart rect.recSize {
+rect.recSize {
     fill: #888;
+}
+
+input[type=text] {
+  width: 40px;
+}
+
+div.extent {
+  overflow: auto;
+  white-space: nowrap;
+  /*background-color: #eee;*/
+  border: 1px dashed #999;
+  margin: 5px;
+  padding: 5px;
+  display: inline-block;
+  margin-right: 15px;
+}
+
+div.extent-desc {
+  min-width: 100px;
+  display: inline-block;
+  vertical-align: top;
+  padding: 5px;
+  margin-right: 5px;
 }

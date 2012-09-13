@@ -22,9 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <link rel="stylesheet" href="index.css"></script>
     </head>
     <body>
-        <input type="file" id="input" onchange="handleFiles(this.files)"></input>
-        <div id="graphs">
-        </div>
+      <label for="barWidth">chunk bar width (in px)</label>
+        <input type="text" id="barWidth" value="6"></input>
+        <input type="file" id="fileSelect" onchange="handleFiles(this.files)"></input>
+        <div id="graphs"></div>
         <div id="json" />
     </body>
 </html>
