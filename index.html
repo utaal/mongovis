@@ -23,9 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
       <label for="barWidth">chunk bar width (in px)</label>
-        <input type="text" id="barWidth" value="6"></input>
-        <input type="file" id="fileSelect" onchange="handleFiles(this.files)"></input>
-        <div id="graphs"></div>
-        <div id="json" />
+      <input type="text" id="barWidth" value="6"></input>
+      <input type="file" id="fileSelect" onchange="handleFiles(this.files)"></input>
+      <button id="render" style="display: none;" onclick="handleRender()">Render</button>
+      <button id="clear" onclick="document.location.reload(true)">Clear</button>
+      <div id="summaryGraphs"></div>
+      <div id="graphs"></div>
+      <div id="json" />
     </body>
 </html>

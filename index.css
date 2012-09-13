@@ -33,6 +33,17 @@ body {
     margin-right: 2px;
 }
 
+#summaryGraphs {
+    margin: 5px;
+    padding: 10px;
+    background-color: #eee;
+}
+
+#summaryGraphs div {
+    vertical-align: top;
+    display: inline-block;
+}
+
 rect.bsonSize {
     fill: steelblue;
 }
@@ -42,24 +53,25 @@ rect.recSize {
 }
 
 input[type=text] {
-  width: 40px;
+    width: 40px;
 }
 
 div.extent {
-  overflow: auto;
-  white-space: nowrap;
-  /*background-color: #eee;*/
-  border: 1px dashed #999;
-  margin: 5px;
-  padding: 5px;
-  display: inline-block;
-  margin-right: 15px;
+    overflow: auto;
+    white-space: nowrap;
+    /*background-color: #eee;*/
+    border: 1px dashed #999;
+    margin: 5px;
+    padding: 5px;
+    display: inline-block;
+    margin-right: 15px;
 }
 
-div.extent-desc {
-  min-width: 100px;
-  display: inline-block;
-  vertical-align: top;
-  padding: 5px;
-  margin-right: 5px;
+div.extent-desc,
+div.coll-desc {
+    min-width: 100px;
+    display: inline-block;
+    vertical-align: top;
+    padding: 5px;
+    margin-right: 5px;
 }

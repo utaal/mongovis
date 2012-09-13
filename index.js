@@ -17,6 +17,7 @@
 */
 
 var BAR_HEIGHT = 150;
+var SUMMARY_BAR_WIDTH = 20;
 
 var _data = null;
 
@@ -24,22 +25,9 @@ function compose(f, g) {
   return function(x) { return f(g(x)) }
 }
 
-function handleFiles(files) {
-  var reader = new FileReader();
-  var text = reader.readAsText(files[0]);
-  var barSize = + document.getElementById("barWidth").value;
-  reader.onload = (function(file) {
-    _data = JSON.parse(file.target.result);
-    render(_data, barSize);
-    document.getElementById("json").innerHTML = JSON.stringify(_data);
-  });
-  d3.select("#fileSelect").style({ display: "none" });
-}
-
 function percentStr(val) {
   return (val * 100).toFixed(2);
 }
-
 
 var bsonSizeToDiskSizeRatio = function(d) {
   return d.bsonSize / d.onDiskSize;
@@ -48,30 +36,67 @@ var nonBsonRecSizeToDiskSizeRatio = function(d) {
   return (d.recSize - d.bsonSize) / d.onDiskSize;
 }
 
+function handleFiles(files) {
+  var reader = new FileReader();
+  var text = reader.readAsText(files[0]);
+  var barSize = + document.getElementById("barWidth").value;
+  reader.onload = (function(file) {
+    _data = JSON.parse(file.target.result);
+    console.log(_data);
+    render(_data, barSize);
+  });
+  d3.select("#fileSelect").style({display: "none"});
+  d3.select("#render").style({display: null});
+}
+
+function handleRender() {
+  var barSize = + document.getElementById("barWidth").value;
+  d3.select("#graphs").selectAll("*").remove();
+  d3.select("#summaryGraphs").selectAll("*").remove();
+  render(_data, barSize);
+}
+
 function render(data, barSize) {
   //TODO(andrea.lattuada) refactor
-  d3.select("#graphs").select("svg").remove();
   if (data.extents) {
+    var summaryGraphs = d3.select("#summaryGraphs");
+    appendDescDiv(summaryGraphs, "collection", data, "coll-desc");
     for (var i = 0; i < data.extents.length; ++i) {
       var extentData = data.extents[i];
       renderExtent(i, extentData, barSize);
+      var collSummaryExtent = summaryGraphs.append("a")
+        .attr("onclick", "highlightExtent(" + i + "); return true;")
+        .attr("href", "#extent" + i).append("div");
+      renderExtentSummary(collSummaryExtent, extentData,
+          SUMMARY_BAR_WIDTH);
     }
   } else if (data.chunks) {
     renderExtent("", data, barSize);
   }
 }
 
+function highlightExtent(extentNum) {
+  d3.selectAll(".extent").style({"background-color": null});
+  d3.select("#graphs").select("a[name='extent" + extentNum + "']")
+    .select("div").style({"background-color": "#ffc"});
+}
+
+function appendDescDiv(toElm, title, data, clazz) {
+  toElm.append("div").attr("class", clazz).html(
+      title + "<br/>" +
+      "records: " + data.numEntries + "<br/>" +
+      "records size: " + data.recSize + "<br/>" +
+      "(% of ext used: " + percentStr(data.recSize / data.onDiskSize) + ")<br/>" +
+      "BSONs size: " + data.bsonSize + "<br/>" +
+      "(% of ext used: " + percentStr(data.bsonSize / data.onDiskSize) + ")<br/>" +
+      "padding: " + (data.recSize / data.bsonSize).toFixed(4));
+}
+
 function renderExtent(extentNum, extentData, barSize) {
-  var extentDiv = d3.select("#graphs").append("div").attr("class", "extent");
-  renderExtentSummary(extentDiv, extentData, barSize * 2);
-  extentDiv.append("div").attr("class", "extent-desc").html(
-      "extent " + extentNum + "<br/>" +
-      "records: " + extentData.numEntries + "<br/>" +
-      "records size: " + extentData.recSize + "<br/>" +
-      "(% of ext used: " + percentStr(extentData.recSize / extentData.onDiskSize) + ")<br/>" +
-      "BSONs size: " + extentData.bsonSize + "<br/>" +
-      "(% of ext used: " + percentStr(extentData.bsonSize / extentData.onDiskSize) + ")<br/>" +
-      "padding: " + (extentData.recSize / extentData.bsonSize).toFixed(4));
+  var extentDiv = d3.select("#graphs").append("a")
+    .attr("name", "extent" + extentNum).append("div").attr("class", "extent");
+  renderExtentSummary(extentDiv, extentData, SUMMARY_BAR_WIDTH);
+  appendDescDiv(extentDiv, "extent " + extentNum, extentData, "extent-desc");
   renderExtentGraph(extentDiv, extentData, barSize);
 }
 
