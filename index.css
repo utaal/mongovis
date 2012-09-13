@@ -34,6 +34,8 @@ body {
 }
 
 #summaryGraphs {
+    overflow: auto;
+    white-space: nowrap;
     margin: 5px;
     padding: 10px;
     background-color: #eee;

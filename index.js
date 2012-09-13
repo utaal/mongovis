@@ -67,8 +67,11 @@ function render(data, barSize) {
       var collSummaryExtent = summaryGraphs.append("a")
         .attr("onclick", "highlightExtent(" + i + "); return true;")
         .attr("href", "#extent" + i).append("div");
-      renderExtentSummary(collSummaryExtent, extentData,
-          SUMMARY_BAR_WIDTH);
+      var extentBarWidth = extentData.onDiskSize / 100000;
+      if (extentBarWidth < SUMMARY_BAR_WIDTH / 2) {
+        extentBarWidth = SUMMARY_BAR_WIDTH / 2;
+      }
+      renderExtentSummary(collSummaryExtent, extentData, extentBarWidth);
     }
   } else if (data.chunks) {
     renderExtent("", data, barSize);
