@@ -22,14 +22,21 @@ body {
 }
 
 .extent-chart {
+    display: block;
+}
+
+.extent-chart-usage {
     border: 1px solid black;
+}
+
+.extent-chart-charact {
+    margin-left: 1px;
 }
 
 .extent-chart rect {
 }
 
 .extent-summary {
-    border: 1px solid black;
     margin-right: 2px;
 }
 
@@ -47,11 +54,23 @@ body {
 }
 
 rect.bsonSize {
-    fill: steelblue;
+    fill: #88f;
 }
 
 rect.recSize {
-    fill: #888;
+    fill: #aaf;
+}
+
+rect.charact {
+    fill: #bbb;
+}
+
+rect.graph-line {
+    stroke: black;
+}
+
+rect.missing-datum {
+    fill: #f77;
 }
 
 input[type=text] {
@@ -67,6 +86,10 @@ div.extent {
     padding: 5px;
     display: inline-block;
     margin-right: 15px;
+}
+
+div.extent > div {
+    display: inline-block;
 }
 
 div.extent-desc,
