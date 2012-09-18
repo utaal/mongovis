@@ -29,7 +29,8 @@ body {
     border: 1px solid black;
 }
 
-.extent-chart-charact {
+.extent-chart-charact,
+.extent-chart-avgsize {
     margin-left: 1px;
 }
 
@@ -59,6 +60,10 @@ rect.bsonSize {
 
 rect.recSize {
     fill: #aaf;
+}
+
+rect.avgSize {
+    fill: green;
 }
 
 rect.charact {
