@@ -21,6 +21,11 @@ body {
     font-size: 10px;
 }
 
+#wrapper {
+    padding-right: 150px;
+    padding-bottom: 200px;
+}
+
 .extent-chart {
     display: block;
 }
@@ -104,4 +109,12 @@ div.coll-desc {
     vertical-align: top;
     padding: 5px;
     margin-right: 5px;
+}
+
+div#popup {
+    position: absolute;
+    background-color: white;
+    border: 1px solid blue;
+    padding: 3px;
+    opacity: 0.8;
 }

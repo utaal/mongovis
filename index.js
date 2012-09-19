@@ -194,13 +194,48 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
     .attr("height", function(d) {
       return avgsizey(sizeBoundary.ranged(avgRecSize(d)));
     });
-  var enter = extentChart.selectAll("rect").data(arr).enter();
-  enter.append("rect")
+  var enterapp = extentChart.selectAll("rect").data(arr).enter().append("svg:g");
+  enterapp.on("mouseout", function(datum) {
+    $("#popup").hide();
+  });
+  enterapp.on("mouseover", function(datum) {
+    var freeRecs = d3.select(this).datum().freeRecsPerBucket;
+    console.log(datum);
+    $("#popup").show();
+    var popup = d3.select("#popup");
+    console.log(this);
+    var offset = $(this).offset();
+    popup.style("top", offset.top + 100).style("left", offset.left + 10);
+    var xlog = d3.scale.log().domain([1, 500000]).range([0, 100]);
+    popup.selectAll("*").remove();
+    var popupEnter = popup.append("svg")
+      .attr("width", 150)
+      .attr("height", 11 * freeRecs.length + 1)
+      .selectAll("rect").data(freeRecs).enter();
+    popupEnter.append("rect")
+        .attr("y", function (d, i) { return i * 11 + 1 })
+        .attr("x", 50)
+        .attr("width", xlog) 
+        .attr("height", 10)
+        .attr("fill", "#888");
+    popupEnter.append("svg:text")
+        .text(function (d, i) { return d; })
+        .attr("y", function (d, i) { return i * 11 + 1 })
+        .attr("fill", "black")
+        .attr("dy", ".73em")
+        .attr("text-anchor", "start");
+  });
+  enterapp.append("rect")
+    .attr("x", x())
+    .attr("width", xsize)
+    .attr("height", BAR_HEIGHT)
+    .attr("fill", "transparent");
+  enterapp.append("rect")
     .attr("class", "bsonSize")
     .attr("x", x())
     .attr("width", xsize)
     .attr("height", _.compose(y, bsonSizeToDiskSizeRatio));
-  enter.append("rect")
+  enterapp.append("rect")
     .attr("class", "recSize")
     .attr("x", x())
     .attr("width", xsize)
