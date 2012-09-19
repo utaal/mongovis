@@ -17,10 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
     <head>
         <title>mongovis visualizer</title>
+        <script type="text/javascript" src="jquery.js"></script>
         <script type="text/javascript" src="d3.v2.js"></script>
         <script type="text/javascript" src="underscore.js"></script>
         <script type="text/javascript" src="index.js"></script>
-        <link rel="stylesheet" href="index.css"></script>
+        <link rel="stylesheet" href="index.css" />
     </head>
     <body>
       <label for="barWidth">chunk bar width (in px)</label>
@@ -28,8 +29,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <input type="file" id="fileSelect" onchange="handleFiles(this.files)"></input>
       <button id="render" style="display: none;" onclick="handleRender()">Render</button>
       <button id="clear" onclick="document.location.reload(true)">Clear</button>
-      <div id="summaryGraphs"></div>
-      <div id="graphs"></div>
-      <div id="json" />
+      <div id="wrapper">
+        <div id="summaryGraphs"></div>
+        <div id="graphs"></div>
+        <div id="json" />
+        <div id="popup" />
+      </div>
     </body>
 </html>
