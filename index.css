@@ -30,6 +30,15 @@ body {
     display: block;
 }
 
+.extent-recs {
+  overflow: auto;
+}
+
+
+.extent-recs > svg {
+    border: 1px solid black;
+}
+
 .extent-chart-usage {
     border: 1px solid black;
 }
@@ -64,11 +73,16 @@ rect.bsonSize {
 }
 
 rect.recSize {
-    fill: #aaf;
+    fill: #bbf;
 }
 
 rect.avgSize {
     fill: green;
+}
+
+rect.delRec {
+    fill: #aaa;
+    stroke: black;
 }
 
 rect.charact {
@@ -81,6 +95,10 @@ rect.graph-line {
 
 rect.missing-datum {
     fill: #f77;
+}
+
+rect.record {
+    stroke: #fff;
 }
 
 input[type=text] {
@@ -118,3 +136,4 @@ div#popup {
     padding: 3px;
     opacity: 0.8;
 }
+

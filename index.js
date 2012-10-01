@@ -51,7 +51,6 @@ function handleFiles(files) {
   var barSize = + document.getElementById("barWidth").value;
   reader.onload = (function(file) {
     _data = JSON.parse(file.target.result);
-    console.log(_data);
     render(_data, barSize);
   });
   d3.select("#fileSelect").style({display: "none"});
@@ -109,6 +108,9 @@ function render(data, barSize) {
     var charactBoundaries = computeCharactBoundaries(data.chunks);
     var sizeBoundary = computeSizeBoundary(data.chunks);
     renderExtent("", data, barSize, charactBoundaries, sizeBoundary);
+    if (data.records) {
+        renderExtentRecords(data);
+    }
   }
 }
 
@@ -262,4 +264,97 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
           .attr("y", 10);
       }
     });
+}
+
+var BYTES_PER_PIXEL = 2;
+
+function renderExtentRecords(data) {
+  var x = d3.scale.linear()
+    .domain([0, data.onDiskSize])
+    .range([0, data.onDiskSize / BYTES_PER_PIXEL]);
+  var recsDiv = d3.select("#graphs")
+    .append("div").attr("class", "extent-recs");
+  var svg = recsDiv.append("svg")
+    .attr("width", data.onDiskSize / BYTES_PER_PIXEL + 1).attr("height", 100)
+  var enter = svg.selectAll().data(data.records).enter();
+  var enterapp = enter.append("svg:g").attr("class", "record")
+  enterapp.append("rect")
+    .attr("class", "recSize")
+    .attr("y", 3)
+    .attr("x", _.compose(x, function(d) { return d.ofs }))
+    .attr("width", _.compose(x, function(d) { return d.diskSize }))
+    .attr("height", 50);
+  enterapp.append("rect")
+    .attr("class", "bsonSize")
+    .attr("y", 3)
+    .attr("x", _.compose(x, function(d) { return d.ofs }))
+    .attr("width", _.compose(x, function(d) { return d.bsonSize }))
+    .attr("height", 50);
+  enterapp.on("mouseout", function(datum) {
+    $("#popup").hide();
+  });
+  enterapp.on("mouseover", function(datum) {
+    var datum = d3.select(this).datum();
+    console.log(datum);
+    $("#popup").show();
+    var popup = d3.select("#popup");
+    var offset = $(this).offset();
+    popup.style("top", offset.top - 50).style("left", offset.left + 10);
+    popup.selectAll("*").remove();
+    popup.append("div")
+      .html("id -> " + datum.id + "<br/>" +
+            "starts at " + datum.ofs + "<br/>" +
+            "size: " + datum.diskSize + "<br/>" +
+            "BSON size: " + datum.bsonSize + "<br/>" +
+            "charact. value: " + datum.charact + "<br/>");
+  });
+
+  var enterDel = svg.selectAll().data(data.deletedRecords).enter();
+  var enterappDel = enterDel.append("svg:g").attr("class", "deletedRecord")
+  enterappDel.append("rect")
+    .attr("class", "delRec")
+    .attr("y", 3)
+    .attr("x", _.compose(x, function(d) { return d.ofs }))
+    .attr("width", _.compose(x, function(d) { return d.diskSize }))
+    .attr("height", 50);
+
+  enterappDel.on("mouseout", function(datum) {
+    $("#popup").hide();
+  });
+  enterappDel.on("mouseover", function(datum) {
+    var datum = d3.select(this).datum();
+    console.log(datum);
+    $("#popup").show();
+    var popup = d3.select("#popup");
+    var offset = $(this).offset();
+    popup.style("top", offset.top - 50).style("left", offset.left + 10);
+    popup.selectAll("*").remove();
+    popup.append("div")
+      .html("deleted record<br/>" +
+            "starts at " + datum.ofs + "<br/>" +
+            "size: " + datum.diskSize + "<br/>");
+  });
+
+  var tick = svg.selectAll()
+      .data(x.ticks(data.onDiskSize / 1000));
+
+  var tickEnter = tick.enter();
+  //.append("svg:g")
+  //    .attr("class", "tick")
+  //    .attr("x", x)
+  //    .style("opacity", 1e-6);
+
+  tickEnter.append("svg:line")
+      .attr("stroke", "black")
+      .attr("x1", x)
+      .attr("x2", x)
+      .attr("y1", 60)
+      .attr("y2", 60 * 7 / 6);
+
+  tickEnter.append("svg:text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "1em")
+      .attr("y", 60 * 7 / 6)
+      .attr("x", x)
+      .text(function(d) { return d / 1000 + "K"; });
 }
