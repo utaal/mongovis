@@ -107,7 +107,7 @@ function render(data, barSize) {
   } else if (data.chunks) {
     var charactBoundaries = computeCharactBoundaries(data.chunks);
     var sizeBoundary = computeSizeBoundary(data.chunks);
-    renderExtent("", data, barSize, charactBoundaries, sizeBoundary);
+    renderExtent(" range " + data.range, data, barSize, charactBoundaries, sizeBoundary);
     if (data.records) {
         renderExtentRecords(data);
     }
@@ -123,6 +123,7 @@ function highlightExtent(extentNum) {
 function appendDescDiv(toElm, title, data, clazz) {
   toElm.append("div").attr("class", clazz).html(
       title + "<br/>" +
+      "size: " + data.onDiskSize + "<br/>" +
       "records: " + data.numEntries + "<br/>" +
       "records size: " + data.recSize + "<br/>" +
       "avg. record size: " + (data.recSize / data.numEntries).toFixed(4) + "<br/>" +
@@ -201,15 +202,19 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
     $("#popup").hide();
   });
   enterapp.on("mouseover", function(datum) {
+    var datum = d3.select(this).datum();
     var freeRecs = d3.select(this).datum().freeRecsPerBucket;
     console.log(datum);
     $("#popup").show();
     var popup = d3.select("#popup");
-    console.log(this);
     var offset = $(this).offset();
     popup.style("top", offset.top + 100).style("left", offset.left + 10);
     var xlog = d3.scale.log().domain([1, 500000]).range([0, 100]);
     popup.selectAll("*").remove();
+    popup.append("div").html("chunk" + "<br/>" +
+      "length: " + datum.onDiskSize + "<br/>" +
+      "num. records: " + datum.numEntries + "<br/>" +
+      "rec. size: " + datum.recSize);
     var popupEnter = popup.append("svg")
       .attr("width", 150)
       .attr("height", 11 * freeRecs.length + 1)
@@ -221,7 +226,7 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
         .attr("height", 10)
         .attr("fill", "#888");
     popupEnter.append("svg:text")
-        .text(function (d, i) { return d; })
+        .text(function (d, i) { return Math.pow(2, i + 5) + "B " + d.toFixed(2); })
         .attr("y", function (d, i) { return i * 11 + 1 })
         .attr("fill", "black")
         .attr("dy", ".73em")
@@ -231,7 +236,7 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
     .attr("x", x())
     .attr("width", xsize)
     .attr("height", BAR_HEIGHT)
-    .attr("fill", "transparent");
+    .attr("fill", "white");
   enterapp.append("rect")
     .attr("class", "bsonSize")
     .attr("x", x())
@@ -243,6 +248,16 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
     .attr("width", xsize)
     .attr("y", _.compose(y, bsonSizeToDiskSizeRatio))
     .attr("height", _.compose(y, nonBsonRecSizeToDiskSizeRatio));
+  /*enterapp.append("rect")*/
+  /*.attr("class", "freeRec")*/
+  /*.attr("x", x())*/
+  /*.attr("width", xsize)*/
+  /*.attr("y", _.compose(y, function(d) {*/
+  /*return bsonSizeToDiskSizeRatio(d) + nonBsonRecSizeToDiskSizeRatio(d);*/
+  /*}))*/
+  /*.attr("height", _.compose(y, function(d) {*/
+  /*return d.freeRecsSize;*/
+  /*}));*/
   extentChartCharact.selectAll("rect").data(arr)
     .enter().append("rect")
     .attr("class", "charact")
@@ -266,10 +281,14 @@ function renderGraph(div, arr, barSize, charactBoundaries, sizeBoundary) {
     });
 }
 
-var BYTES_PER_PIXEL = 2;
+var BYTES_PER_PIXEL = 4;
 
 function renderExtentRecords(data) {
+  console.log(data.range);
   var x = d3.scale.linear()
+    .domain(data.range)
+    .range([0, data.onDiskSize / BYTES_PER_PIXEL]);
+  var width = d3.scale.linear()
     .domain([0, data.onDiskSize])
     .range([0, data.onDiskSize / BYTES_PER_PIXEL]);
   var recsDiv = d3.select("#graphs")
@@ -282,13 +301,13 @@ function renderExtentRecords(data) {
     .attr("class", "recSize")
     .attr("y", 3)
     .attr("x", _.compose(x, function(d) { return d.ofs }))
-    .attr("width", _.compose(x, function(d) { return d.diskSize }))
+    .attr("width", _.compose(width, function(d) { return d.recSize }))
     .attr("height", 50);
   enterapp.append("rect")
     .attr("class", "bsonSize")
     .attr("y", 3)
     .attr("x", _.compose(x, function(d) { return d.ofs }))
-    .attr("width", _.compose(x, function(d) { return d.bsonSize }))
+    .attr("width", _.compose(width, function(d) { return d.bsonSize }))
     .attr("height", 50);
   enterapp.on("mouseout", function(datum) {
     $("#popup").hide();
@@ -304,7 +323,7 @@ function renderExtentRecords(data) {
     popup.append("div")
       .html("id -> " + datum.id + "<br/>" +
             "starts at " + datum.ofs + "<br/>" +
-            "size: " + datum.diskSize + "<br/>" +
+            "size: " + datum.onDiskSize + "<br/>" +
             "BSON size: " + datum.bsonSize + "<br/>" +
             "charact. value: " + datum.charact + "<br/>");
   });
@@ -315,7 +334,7 @@ function renderExtentRecords(data) {
     .attr("class", "delRec")
     .attr("y", 3)
     .attr("x", _.compose(x, function(d) { return d.ofs }))
-    .attr("width", _.compose(x, function(d) { return d.diskSize }))
+    .attr("width", _.compose(width, function(d) { return d.recSize }))
     .attr("height", 50);
 
   enterappDel.on("mouseout", function(datum) {
@@ -332,11 +351,11 @@ function renderExtentRecords(data) {
     popup.append("div")
       .html("deleted record<br/>" +
             "starts at " + datum.ofs + "<br/>" +
-            "size: " + datum.diskSize + "<br/>");
+            "size: " + datum.onDiskSize + "<br/>");
   });
 
   var tick = svg.selectAll()
-      .data(x.ticks(data.onDiskSize / 1000));
+      .data(x.ticks((data.range[1] - data.range[0]) / 1000));
 
   var tickEnter = tick.enter();
   //.append("svg:g")

@@ -76,6 +76,10 @@ rect.recSize {
     fill: #bbf;
 }
 
+rect.freeRec {
+    fill: #cfc;
+}
+
 rect.avgSize {
     fill: green;
 }
