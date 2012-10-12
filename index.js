@@ -45,14 +45,41 @@ var charactRatio = function(boundaries) {
   };
 }
 
-function handleFiles(files) {
-  var reader = new FileReader();
-  var text = reader.readAsText(files[0]);
-  var barSize = + document.getElementById("barWidth").value;
-  reader.onload = (function(file) {
-    _data = JSON.parse(file.target.result);
-    render(_data, barSize);
+function handleLoad() {
+  var request = "http://localhost:28017/";
+  request += $("#database").val() + "/";
+  request += "$cmd/";
+  request += "?filter_storageDetails=" + $("#collection").val();
+  request += "&filter_analyze=diskStorage";
+  if ($("#allExtents").prop("checked")) {
+    alert("unsupported");
+    return;
+  } else {
+    request += "&filter_extent=" + $("#extent").val();
+  }
+  request += "&filter_granularity=" + $("#granularity").val();
+  if ($("#showRecords").prop("checked")) {
+    request += "&filter_showRecords=true";
+  }
+  request += "&limit=1";
+  request += "&jsonp=?";
+  $("#requestUrl").text(request);
+  $.getJSON(request,
+  {
+  },
+  function(data) {
+    $("#queryJson").text(JSON.stringify(data.query));
+    handleData(data);
   });
+}
+
+function handleData(data) {
+  var barSize = + document.getElementById("barWidth").value;
+  _data = data;
+  if (_data.rows) {
+    _data = _data.rows[0];
+  }
+  render(_data, barSize);
   d3.select("#fileSelect").style({display: "none"});
   d3.select("#render").style({display: null});
 }
