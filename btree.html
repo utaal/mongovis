@@ -35,7 +35,7 @@ path.link {
 
 var m = [20, 120, 20, 300],
     w = 4000 - m[1] - m[3],
-    h = 4000 - m[0] - m[2],
+    h = 8000 - m[0] - m[2],
     i = 0,
     root;
 
@@ -52,7 +52,7 @@ var vis = d3.select("#body").append("svg:svg")
     .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
 d3.json("btree.json", function(json) {
-  root = json.indexes[0].head;
+  root = json.head;
   console.log(root);
   root.x0 = h / 2;
   root.y0 = 0;
@@ -95,11 +95,15 @@ function update(source) {
       .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeEnter.append("svg:text")
+       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+       .attr("dy", ".0em")
+       .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+       .text(function(d) { return d.firstKey[""]; });
+  nodeEnter.append("svg:text")
       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-      .attr("dy", ".35em")
+      .attr("dy", "1em")
       .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-      .text(function(d) { console.log(d.firstKey[""]); return d.firstKey[""]; })
-      .style("fill-opacity", 1e-6);
+      .text(function(d) { return d.lastKey[""]; });
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
