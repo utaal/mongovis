@@ -56,6 +56,10 @@ this.handleData = function handleData(data) {
         (_data.isIdIndex ? ' | this is an _id index' : ''), _data));
 }
 
+function renderStats(big) {
+
+}
+
 setUp();
 
 })();
