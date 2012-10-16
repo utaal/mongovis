@@ -22,8 +22,8 @@ var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_indexStats=<%=co
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
-    { name: 'database', desc: 'db', type: 'text', default_: 'test' },
-    { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
+    { name: 'database', desc: 'db', type: 'text', default_: 'random' },
+    { name: 'collection', desc: 'collection', type: 'text', default_: 'random' },
     { name: 'index', desc: 'index', type: 'text', default_: '_id_' }
 ]
 
@@ -80,17 +80,105 @@ function statsDisplay() {
     function chart(selection) {
         selection.each(function(data) {
             var $this = d3.select(this);
-            if (big) {
+            $this.selectAll('*').remove();
+            if (chart._big) {
                 $this.append('div').html(base.tmpl(
-                    '<%=numBuckets%> buckets, on average <b><%=base.fmt.stat.percentAndErr(fillRatio)%></b> full' +
+                    '<b><%=numBuckets%></b> buckets' +
+                    ', on average <b><%=base.fmt.stat.percentAndErr(fillRatio)%></b> full' +
                     '<br/><b><%=base.fmt.stat.percentAndErr(keyNodeRatio)%></b> key nodes' +
                     ', <b><%=base.fmt.stat.percentAndErr(bsonRatio)%></b> bson keys'
                 , data));
             }
+            var ratios = [
+                { desc: '% full', data: data.fillRatio },
+                { desc: '% bson keys', data: data.bsonRatio },
+                { desc: '% key nodes', data: data.keyNodeRatio }
+            ];
+
+            var graphWidth = chart._width - 110;
+
+            var ratiosSvg = $this.append('div').append('svg')
+                .classed('boxplot', true)
+                .attr('width', chart._width)
+                .attr('height', 40 * ratios.length);
+
+            var ratiosG = ratiosSvg
+                .selectAll('g')
+                .data(ratios);
+
+            var ratioBoxChart = boxChart()
+                .domain([0, 1])
+                .showAxis(false)
+                .width(graphWidth)
+                .big(true);
+
+            var ratiosEnter = ratiosG.enter()
+
+            var y = function(d, i) { return (i * 25 + 10) };
+
+            ratiosEnter.append('svg:text')
+                .attr('x', 90)
+                .attr('y', y)
+                .attr('dy', 13)
+                .attr('text-anchor', 'end')
+                .text(function(d) { return d.desc });
+
+            ratiosEnter.append('svg:g')
+                .attr('transform', function(d, i) { return 'translate(100, ' + y(d, i) + ')' })
+                .datum(function(d) { return d.data })
+                .call(ratioBoxChart);
+
+            var x = d3.scale.linear().domain([0, 1]).range([0, graphWidth]);
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .tickValues(x.ticks(8))
+                .orient('bottom');
+
+            ratiosSvg.append('svg:g')
+                .classed('x axis', true)
+                .attr('transform', 'translate(100, ' + (ratios.length * 25 + 10) + ')')
+                .call(xAxis);
+
+            var counts = [
+                { desc: 'used keys', data: data.usedKeyCount },
+                { desc: 'keys', data: data.keyCount }
+            ]
+
+            var countBoxChart = ratioBoxChart
+                .fillBar(false)
+                .domain(null)
+                .showAxis(true);
+
+            var countsSvg = $this.append('div').append('svg')
+                .classed('boxplot', true)
+                .attr('width', chart._width)
+                .attr('height', 40 * ratios.length);
+
+            var countsG = countsSvg
+                .selectAll('g')
+                .data(counts);
+
+            var countsEnter = countsG.enter();
+
+            y = function(d, i) { return (i * 50 + 10) };
+
+            countsEnter.append('svg:text')
+                .attr('x', 90)
+                .attr('y', y)
+                .attr('dy', 13)
+                .attr('text-anchor', 'end')
+                .text(function(d) { return d.desc });
+
+            countsEnter.append('svg:g')
+                .attr('transform', function(d, i) { return 'translate(100, ' + y(d, i) + ')' })
+                .datum(function(d) { return d.data })
+                .call(countBoxChart);
+
         });
     }
 
     base.property(chart, 'big', false);
+    base.property(chart, 'width', 450);
 
     return chart;
 }

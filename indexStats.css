@@ -86,3 +86,15 @@ input {
 #basicInfoRow {
     font-weight: bold;
 }
+
+/* --- BOX-PLOT --- */
+.boxplot { font: 10px sans-serif; }
+.boxplot line.whisker, line.center, line.median, .boxplot rect.box, .boxplot circle { stroke: #000; fill: #fff; }
+.boxplot line { stroke-width: 1px; shape-rendering: crispEdges; }
+.boxplot rect.fill-bar { stroke: none; fill: #ccf; }
+.boxplot .center { stroke-dasharray: 3 3; }
+.boxplot .outlier { stroke: #ccc; fill: none; }
+.boxplot path.mean { stroke: none; fill: #f00; }
+.boxplot path.median { stroke:none; fill: #00f; }
+.boxplot path.stddev { fill:none; stroke: #f00; stroke-width: 1px; shape-rendering: crispEdges; }
+.boxplot .axis path, .boxplot .axis line { fill: none; stroke: #000; stroke-width: 1px; shape-rendering: crispEdges; }
