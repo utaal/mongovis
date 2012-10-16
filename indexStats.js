@@ -80,9 +80,26 @@ function statsDisplay() {
     function chart(selection) {
         selection.each(function(data) {
             var $this = d3.select(this);
-            $this.append('div').html(base.tmpl(
-                '<%=numBuckets%> buckets, on average <%=base.fmt.stat.percentAndErr(fillRatio)%> full'
-            , data));
+            if (big) {
+                $this.append('div').html(base.tmpl(
+                    '<%=numBuckets%> buckets, on average <b><%=base.fmt.stat.percentAndErr(fillRatio)%></b> full' +
+                    '<br/><b><%=base.fmt.stat.percentAndErr(keyNodeRatio)%></b> key nodes' +
+                    ', <b><%=base.fmt.stat.percentAndErr(bsonRatio)%></b> bson keys'
+                , data));
+            }
+        });
+    }
+
+    base.property(chart, 'big', false);
+
+    return chart;
+}
+
+function boxPlot() {
+
+    function chart(selection) {
+        selection.each(function(data) {
+
         });
     }
 
