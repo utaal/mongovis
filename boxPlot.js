@@ -70,9 +70,9 @@ function boxChart() {
                 fillBar.enter().append("svg:rect")
                     .classed("fill-bar", true)
                     .attr("x", 0)
-                    .attr("y", height / 6)
+                    .attr("y", 0)
                     .attr("width", x)
-                    .attr("height", height / 6 * 4)
+                    .attr("height", height);
             }
 
             if (chart._showAxis) {
