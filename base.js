@@ -22,11 +22,13 @@ d3.selection.prototype.value = function(val) {
     else this.property('value', val);
 }
 
+var base = this.base = {};
+
 // Simple JavaScript Templating
 // John Resig - http://ejohn.org/ - MIT Licensed
 var cache = {};
 
-this.Tmpl = function Tmpl(str, data){
+base.tmpl = function Tmpl(str, data){
     // Figure out if we're getting a template, or if we need to
     // load the template - and be sure to cache the result.
     var fn = !/\W/.test(str) ?
@@ -56,13 +58,13 @@ this.Tmpl = function Tmpl(str, data){
     return data ? fn( data ) : fn;
 };
 
-this.Jsonp = function(url, callbackName) {
+base.jsonp = function(url, callbackName) {
     var script = document.createElement('script');
     script.src = url + "&limit=1&jsonp=" + callbackName;
     document.getElementsByTagName('body')[0].appendChild(script);
 };
 
-this.GenerateFormFields = function(selection, fields, onClick) {
+base.generateFormFields = function(selection, fields, onClick) {
     fields.map(function(x) {
         selection.append('label').attr('for', x.name).text(x.desc);
         var input = selection.append('input').attr('name', x.name).attr('type', x.type);
@@ -71,12 +73,32 @@ this.GenerateFormFields = function(selection, fields, onClick) {
     selection.append('button').text('submit').on('click', onClick);
 };
 
-this.CollectFormValues = function(selection, fields) {
+base.collectFormValues = function(selection, fields) {
     var params = {};
     fields.map(function(x) {
         params[x.name] = selection.select('input[name=' + x.name + ']').value();
     });
     return params;
 };
+
+base.property = function(obj, name, default_) {
+    obj['_' + name] = default_;
+    obj[name] = function(_) {
+        if (!arguments.length) return obj['_' + name];
+        else obj['_' + name] = _;
+        return this;
+    };
+};
+
+base.fmt = {
+    percent: d3.format('.3p'),
+    percentAndErr: function(val, err) {
+        return this.percent(val) + ' (&plusmn;' + this.percent(err) + ')';
+    }
+}
+
+base.fmt.stat = {
+    percentAndErr: function(stat) { return base.fmt.percentAndErr(stat.mean, stat.stddev); }
+}
 
 })();

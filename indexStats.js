@@ -29,10 +29,10 @@ var REQUEST_FORM_FIELDS = [
 
 function setUp() {
     var requestForm = d3.select('#requestForm');
-    GenerateFormFields(requestForm, REQUEST_FORM_FIELDS, function() {
-        var url = Tmpl(URL_TEMPLATE, CollectFormValues(requestForm, REQUEST_FORM_FIELDS));
+    base.generateFormFields(requestForm, REQUEST_FORM_FIELDS, function() {
+        var url = base.tmpl(URL_TEMPLATE, base.collectFormValues(requestForm, REQUEST_FORM_FIELDS));
         d3.select('#resultString').text('fetching ' + url + '...');
-        Jsonp(url, 'handleData');
+        base.jsonp(url, 'handleData');
     });
 }
 
@@ -61,28 +61,32 @@ this.handleData = function handleData(data) {
         '<%=depth%> deep',
         'each bucket body is <%=bucketBodyBytes%> bytes',
         (_data.isIdIndex ? ' this is an _id index' : ' ')
-    ].map(function(x) { basicInfoRow.append('div').classed('grid-td', true).text(Tmpl(x, _data)) });
+    ].map(function(x) { basicInfoRow.append('div').classed('grid-td', true).text(base.tmpl(x, _data)) });
+
+    var dataArrays = [[_data.overall], _data.perLevel, _data.expandedNodes];
+    dataArrays.map(function(arr) {
+        // generate calculated data fields
+        if (arr) arr.map(function(x) {
+            x.fillRatio = x.emptyRatio;
+            x.fillRatio.mean = 1 - x.emptyRatio.mean;
+        });
+    });
 
     d3.select('#curNodeStats').datum(_data.overall).call(statsDisplay().big(true));
 }
 
 function statsDisplay() {
-    var _big = false;
 
     function chart(selection) {
         selection.each(function(data) {
             var $this = d3.select(this);
-            $this.append('div').text(
-                    Tmpl('<%=numBuckets%> buckets, on average <%=(1 - emptyRatio.mean)%>', data));
+            $this.append('div').html(base.tmpl(
+                '<%=numBuckets%> buckets, on average <%=base.fmt.stat.percentAndErr(fillRatio)%> full'
+            , data));
         });
     }
 
-    // accessors
-    chart.big = function(_) {
-        if (!arguments.length) return _big;
-        else _big = _;
-        return chart;
-    }
+    base.property(chart, 'big', false);
 
     return chart;
 }
