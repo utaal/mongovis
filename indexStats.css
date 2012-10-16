@@ -20,8 +20,8 @@ body {
     font-family: sans-serif;
     font-size: 10pt;
     color: #555;
-    padding-left: 20px;
-    padding-right: 20px;
+    /*padding-left: 20px;*/
+    /*padding-right: 20px;*/
 }
 
 * {
@@ -32,6 +32,7 @@ body {
 #container {
     margin: 0 auto;
     position: relative;
+    min-width: 940px;
 }
 
 #container > .grid-tr {
@@ -82,6 +83,6 @@ input {
     border-bottom: none;
 }
 
-#resultString {
+#basicInfoRow {
     font-weight: bold;
 }

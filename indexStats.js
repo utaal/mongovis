@@ -31,7 +31,7 @@ function setUp() {
     var requestForm = d3.select('#requestForm');
     GenerateFormFields(requestForm, REQUEST_FORM_FIELDS, function() {
         var url = Tmpl(URL_TEMPLATE, CollectFormValues(requestForm, REQUEST_FORM_FIELDS));
-        d3.select('#resultString').text('fetching ' + url);
+        d3.select('#resultString').text('fetching ' + url + '...');
         Jsonp(url, 'handleData');
     });
 }
@@ -50,14 +50,41 @@ this.handleData = function handleData(data) {
     console.log(_data);
 
     _data.keyPattern = JSON.stringify(_data.keyPattern);
-    d3.select('#resultString').html(Tmpl(
-        'index "<%=name%>" | key pattern: <%=keyPattern%> | storage namespace: ' +
-        '<%=storageNs%> | <%=depth%> deep | each bucket body is <%=bucketBodyBytes%> bytes' +
-        (_data.isIdIndex ? ' | this is an _id index' : ''), _data));
+    d3.select('#resultString').text('executed command ' + JSON.stringify(data.query));
+
+    var basicInfoRow = d3.select('#basicInfoRow');
+    basicInfoRow.selectAll('*').remove();
+    [
+        'index "<%=name%>"',
+        'key pattern: <%=keyPattern%>',
+        'storage namespace: <%=storageNs%>',
+        '<%=depth%> deep',
+        'each bucket body is <%=bucketBodyBytes%> bytes',
+        (_data.isIdIndex ? ' this is an _id index' : ' ')
+    ].map(function(x) { basicInfoRow.append('div').classed('grid-td', true).text(Tmpl(x, _data)) });
+
+    d3.select('#curNodeStats').datum(_data.overall).call(statsDisplay().big(true));
 }
 
-function renderStats(big) {
+function statsDisplay() {
+    var _big = false;
 
+    function chart(selection) {
+        selection.each(function(data) {
+            var $this = d3.select(this);
+            $this.append('div').text(
+                    Tmpl('<%=numBuckets%> buckets, on average <%=(1 - emptyRatio.mean)%>', data));
+        });
+    }
+
+    // accessors
+    chart.big = function(_) {
+        if (!arguments.length) return _big;
+        else _big = _;
+        return chart;
+    }
+
+    return chart;
 }
 
 setUp();
