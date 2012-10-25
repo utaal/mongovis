@@ -47,9 +47,6 @@ function boxChart() {
             var height = chart._height;
             var x = chart._scale || d3.scale.linear().domain(domain).range([0, width]).nice().clamp(true);
 
-            console.log('domain ' + domain + ', range: ' + [0, width]);
-            console.log(data);
-
             // Compute the tick format.
             var format = x.tickFormat(8);
 
@@ -103,58 +100,60 @@ function boxChart() {
             //     .attr("x2", x)
             //     .attr("y2", height + 5);
 
-            // Update center line: the vertical line spanning the whiskers.
-            var center = g.selectAll("line.center").data([[data.quantiles[.01], data.quantiles[.99]]]);
+            if (data.quantiles) {
+                // Update center line: the vertical line spanning the whiskers.
+                var center = g.selectAll("line.center").data([[data.quantiles[.01], data.quantiles[.99]]]);
 
-            center.enter().append("svg:line")
-                .classed("center", true)
-                .attr("y1", height / 2)
-                .attr("x1", function(d) { return x(d[0]); })
-                .attr("y2", height / 2)
-                .attr("x2", function(d) { return x(d[1]); });
+                center.enter().append("svg:line")
+                    .classed("center", true)
+                    .attr("y1", height / 2)
+                    .attr("x1", function(d) { return x(d[0]); })
+                    .attr("y2", height / 2)
+                    .attr("x2", function(d) { return x(d[1]); });
 
-            // Update innerquartile box.
-            var box = g.selectAll("rect.box").data([[data.quantiles[.25], data.quantiles[.75]]]);
+                // Update innerquartile box.
+                var box = g.selectAll("rect.box").data([[data.quantiles[.25], data.quantiles[.75]]]);
 
-            box.enter().append("svg:rect")
-                .classed("box", true)
-                .attr("y", 0)
-                .attr("x", function(d) { return x(d[0]); })
-                .attr("height", height)
-                .attr("width", function(d) { return x(d[1]) - x(d[0]); });
+                box.enter().append("svg:rect")
+                    .classed("box", true)
+                    .attr("y", 0)
+                    .attr("x", function(d) { return x(d[0]); })
+                    .attr("height", height)
+                    .attr("width", function(d) { return x(d[1]) - x(d[0]); });
 
-            // Update median line.
-            var medianLine = g.selectAll("line.median").data([data.quantiles[.5]]);
+                // Update median line.
+                var medianLine = g.selectAll("line.median").data([data.quantiles[.5]]);
 
-            medianLine.enter().append("svg:line")
-                .classed("median", true)
-                .attr("y1", 0)
-                .attr("x1", x)
-                .attr("y2", height)
-                .attr("x2", x);
+                medianLine.enter().append("svg:line")
+                    .classed("median", true)
+                    .attr("y1", 0)
+                    .attr("x1", x)
+                    .attr("y2", height)
+                    .attr("x2", x);
 
-            var median = g.selectAll("path.median").data([data.median]);
+                var median = g.selectAll("path.median").data([data.median]);
 
-            median.enter().append("svg:path")
-                .classed("median", true)
-                .attr("d", function(d) { return "M" + (x(d) - 6) + "," + height + "h12l-6,-6z" });
+                median.enter().append("svg:path")
+                    .classed("median", true)
+                    .attr("d", function(d) { return "M" + (x(d) - 6) + "," + height + "h12l-6,-6z" });
 
-            // Update whiskers.
-            var whisker = g.selectAll("line.whisker").data([data.quantiles[.01], data.quantiles[.99]]);
+                // Update whiskers.
+                var whisker = g.selectAll("line.whisker").data([data.quantiles[.01], data.quantiles[.99]]);
 
-            whisker.enter().append("svg:line")
-                .classed("whisker", true)
-                .attr("y1", 0)
-                .attr("x1", x)
-                .attr("y2", height)
-                .attr("x2", x);
+                whisker.enter().append("svg:line")
+                    .classed("whisker", true)
+                    .attr("y1", 0)
+                    .attr("x1", x)
+                    .attr("y2", height)
+                    .attr("x2", x);
+            }
 
-            var stddev = g.selectAll("line.stddev")
-                .data([[data.mean - data.stddev, data.mean + data.stddev]]);
+                var stddev = g.selectAll("line.stddev")
+                    .data([[data.mean - data.stddev, data.mean + data.stddev]]);
 
-            stddev.enter().append("svg:path")
-                .classed("stddev", true)
-                .attr("d", function(d) { return "M" + x(d[0]) + ",6" + "v-6" + "H" + x(d[1]) + "v6" });
+                stddev.enter().append("svg:path")
+                    .classed("stddev", true)
+                    .attr("d", function(d) { return "M" + x(d[0]) + ",6" + "v-6" + "H" + x(d[1]) + "v6" });
 
             var mean = g.selectAll("path.mean").data([data.mean]);
 

@@ -35,6 +35,7 @@ body {
     min-width: 940px;
 }
 
+.grid-td > .grid-tr,
 #container > .grid-tr {
     width: 100%;
     display: table;
@@ -85,6 +86,23 @@ input {
 
 #basicInfoRow {
     font-weight: bold;
+}
+
+.left-table-header {
+    width: 20px;
+}
+
+.left-table-header > span {
+    writing-mode:tb-rl;
+    -webkit-transform:rotate(-90deg);
+    -moz-transform:rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    white-space:nowrap;
+    display:block;
+    position: relative;
+    top:30;
+    width:20px;
+    height:20px;
 }
 
 /* --- BOX-PLOT --- */

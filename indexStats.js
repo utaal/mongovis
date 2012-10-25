@@ -66,13 +66,28 @@ this.handleData = function handleData(data) {
     var dataArrays = [[_data.overall], _data.perLevel, _data.expandedNodes];
     dataArrays.map(function(arr) {
         // generate calculated data fields
-        if (arr) arr.map(function(x) {
-            x.fillRatio = x.emptyRatio;
-            x.fillRatio.mean = 1 - x.emptyRatio.mean;
-        });
     });
 
     d3.select('#curNodeStats').datum(_data.overall).call(statsDisplay().big(true));
+
+    // debugger;
+    var $levels = d3.select('#levels');
+    $levels.selectAll('*').remove();
+    var levelEnter = $levels.selectAll('.level')
+        .data(_data.perLevel)
+        .enter()
+        .append('div')
+        .classed('level grid-tr', true);
+
+    levelEnter.append('div')
+        .classed('grid-td', true)
+        .classed('left-table-header', true)
+        .append('span')
+        .text(function(d, i) { return 'depth ' + i });
+
+    levelEnter.append('div')
+        .classed('grid-td', true)
+        .call(statsDisplay().big(false).width(300));
 }
 
 function statsDisplay() {
@@ -81,14 +96,12 @@ function statsDisplay() {
         selection.each(function(data) {
             var $this = d3.select(this);
             $this.selectAll('*').remove();
-            if (chart._big) {
-                $this.append('div').html(base.tmpl(
-                    '<b><%=numBuckets%></b> buckets' +
-                    ', on average <b><%=base.fmt.stat.percentAndErr(fillRatio)%></b> full' +
-                    '<br/><b><%=base.fmt.stat.percentAndErr(keyNodeRatio)%></b> key nodes' +
-                    ', <b><%=base.fmt.stat.percentAndErr(bsonRatio)%></b> bson keys'
-                , data));
-            }
+            $this.append('div').html(base.tmpl(
+                '<b><%=numBuckets%></b> buckets' +
+                ', on average <b><%=base.fmt.stat.percentAndErr(fillRatio)%></b> full' +
+                '<br/><b><%=base.fmt.stat.percentAndErr(keyNodeRatio)%></b> key nodes' +
+                ', <b><%=base.fmt.stat.percentAndErr(bsonRatio)%></b> bson keys'
+            , data));
             var ratios = [
                 { desc: '% full', data: data.fillRatio },
                 { desc: '% bson keys', data: data.bsonRatio },
