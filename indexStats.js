@@ -28,6 +28,11 @@ var REQUEST_FORM_FIELDS = [
     { name: 'expandNodes', desc: 'expand nodes (e.g. 0,2,3)', type: 'text', default_: '0' }
 ]
 
+function layoutHacks() {
+    d3.selectAll('.expanded-container').style('max-width',
+                                              document.documentElement.clientWidth - 450);
+}
+
 function setUp() {
     var requestForm = d3.select('#requestForm');
     base.generateFormFields(requestForm, REQUEST_FORM_FIELDS, function() {
@@ -35,6 +40,7 @@ function setUp() {
         d3.select('#resultString').text('fetching ' + url + '...');
         base.jsonp(url, 'handleData');
     });
+    d3.select(window).on('resize', layoutHacks);
 }
 
 var _data;
@@ -110,6 +116,8 @@ this.handleData = function handleData(data) {
         .append('div')
         .classed('expanded-node', true)
         .call(statsDisplay().big(false).width(280));
+
+    layoutHacks();
 }
 
 function statsDisplay() {
