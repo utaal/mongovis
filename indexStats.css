@@ -105,6 +105,19 @@ input {
     height:20px;
 }
 
+.expanded-container {
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+
+.expanded-node {
+    vertical-align: top;
+    display: inline-block;
+    border: 1px dashed #bbb;
+    padding: 6px;
+    margin-right: 12px;
+}
+
 /* --- BOX-PLOT --- */
 .boxplot { font: 10px sans-serif; }
 .boxplot line.whisker, line.center, line.median, .boxplot rect.box, .boxplot circle { stroke: #000; fill: #fff; }

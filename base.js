@@ -91,7 +91,7 @@ base.property = function(obj, name, default_) {
 };
 
 base.fmt = {
-    percent: d3.format('.3p'),
+    percent: function(val) { return val.toFixed(3) }, //d3.format('.3p'),
     percentAndErr: function(val, err) {
         return this.percent(val) + ' (&plusmn;' + this.percent(err) + ')';
     }

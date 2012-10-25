@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (function() {
 
 var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_indexStats=<%=collection%>" +
-                   "&filter_name=<%=index%>";
+                   "&filter_name=<%=index%>&filter_arr_expandNodes=0";
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
@@ -70,11 +70,18 @@ this.handleData = function handleData(data) {
 
     d3.select('#curNodeStats').datum(_data.overall).call(statsDisplay().big(true));
 
+    var levelAndExpandedData = d3.zip(_data.perLevel, _data.expandedNodes).map(function(x) {
+        return {
+            level: x[0],
+            expandedNodes: x[1]
+        }
+    });
+
     // debugger;
     var $levels = d3.select('#levels');
     $levels.selectAll('*').remove();
     var levelEnter = $levels.selectAll('.level')
-        .data(_data.perLevel)
+        .data(levelAndExpandedData)
         .enter()
         .append('div')
         .classed('level grid-tr', true);
@@ -86,8 +93,20 @@ this.handleData = function handleData(data) {
         .text(function(d, i) { return 'depth ' + i });
 
     levelEnter.append('div')
+        .datum(function(d) { return d.level })
         .classed('grid-td', true)
         .call(statsDisplay().big(false).width(300));
+
+    levelEnter.append('div')
+        .classed('grid-td', true)
+        .append('div')
+        .classed('expanded-container', true)
+        .selectAll('.expanded-node')
+        .data(function(d) { return d.expandedNodes })
+        .enter()
+        .append('div')
+        .classed('expanded-node', true)
+        .call(statsDisplay().big(false).width(280));
 }
 
 function statsDisplay() {
@@ -192,19 +211,6 @@ function statsDisplay() {
 
     base.property(chart, 'big', false);
     base.property(chart, 'width', 450);
-
-    return chart;
-}
-
-function boxPlot() {
-
-    function chart(selection) {
-        selection.each(function(data) {
-
-        });
-    }
-
-    base.property(chart, 'big', false);
 
     return chart;
 }
