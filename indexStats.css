@@ -51,6 +51,7 @@ body {
     border-bottom: 1px solid #bbb;
     min-height: 10px;
     padding: 6px 10px 6px 10px;
+    vertical-align: top;
 }
 
 .grid-half {
@@ -97,6 +98,7 @@ input {
     -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
+    margin-top: 30px;
     white-space: nowrap;
     display: block;
     width: 20px;
@@ -104,9 +106,15 @@ input {
     top: 30px;
 }
 
+.level-summary {
+    width: 325px;
+    min-width: 325px;
+}
+
 .expanded-container {
     overflow: auto;
     white-space: nowrap;
+    min-width: 500px;
 }
 
 .expanded-node {

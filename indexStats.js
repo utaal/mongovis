@@ -99,7 +99,7 @@ this.handleData = function handleData(data) {
 
     levelEnter.append('div')
         .datum(function(d) { return d.level })
-        .classed('grid-td', true)
+        .classed('grid-td level-summary', true)
         .call(statsDisplay().big(false).width(300));
 
     levelEnter.append('div')
