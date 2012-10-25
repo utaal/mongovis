@@ -70,12 +70,13 @@ this.handleData = function handleData(data) {
 
     d3.select('#curNodeStats').datum(_data.overall).call(statsDisplay().big(true));
 
-    var levelAndExpandedData = d3.zip(_data.perLevel, _data.expandedNodes).map(function(x) {
-        return {
-            level: x[0],
-            expandedNodes: x[1]
-        }
-    });
+    var levelAndExpandedData = [];
+    for (var d = 0; d < _data.perLevel.length; ++d) {
+        levelAndExpandedData.push({
+            level: _data.perLevel[d],
+            expandedNodes: _data.expandedNodes[d] || []
+        });
+    }
 
     // debugger;
     var $levels = d3.select('#levels');
@@ -98,9 +99,7 @@ this.handleData = function handleData(data) {
         .call(statsDisplay().big(false).width(300));
 
     levelEnter.append('div')
-        .classed('grid-td', true)
-        .append('div')
-        .classed('expanded-container', true)
+        .classed('grid-td expanded-container', true)
         .selectAll('.expanded-node')
         .data(function(d) { return d.expandedNodes })
         .enter()

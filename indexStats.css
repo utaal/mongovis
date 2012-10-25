@@ -99,15 +99,14 @@ input {
     -o-transform: rotate(-90deg);
     white-space:nowrap;
     display:block;
-    position: relative;
     top:30;
     width:20px;
     height:20px;
 }
 
 .expanded-container {
-    overflow-x: scroll;
-    overflow-y: hidden;
+    overflow: auto;
+    white-space: nowrap;
 }
 
 .expanded-node {
