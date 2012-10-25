@@ -18,13 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (function() {
 
 var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_indexStats=<%=collection%>" +
-                   "&filter_name=<%=index%>&filter_arr_expandNodes=0";
+                   "&filter_name=<%=index%>&filter_arr_expandNodes=<%=expandNodes%>";
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
     { name: 'database', desc: 'db', type: 'text', default_: 'random' },
     { name: 'collection', desc: 'collection', type: 'text', default_: 'random' },
-    { name: 'index', desc: 'index', type: 'text', default_: '_id_' }
+    { name: 'index', desc: 'index', type: 'text', default_: '_id_' },
+    { name: 'expandNodes', desc: 'expand nodes (e.g. 0,2,3)', type: 'text', default_: '0' }
 ]
 
 function setUp() {
@@ -61,7 +62,9 @@ this.handleData = function handleData(data) {
         '<%=depth%> deep',
         'each bucket body is <%=bucketBodyBytes%> bytes',
         (_data.isIdIndex ? ' this is an _id index' : ' ')
-    ].map(function(x) { basicInfoRow.append('div').classed('grid-td', true).text(base.tmpl(x, _data)) });
+    ].map(function(x) {
+        basicInfoRow.append('div').classed('grid-td', true).text(base.tmpl(x, _data))
+    });
 
     var dataArrays = [[_data.overall], _data.perLevel, _data.expandedNodes];
     dataArrays.map(function(arr) {
@@ -74,7 +77,8 @@ this.handleData = function handleData(data) {
     for (var d = 0; d < _data.perLevel.length; ++d) {
         levelAndExpandedData.push({
             level: _data.perLevel[d],
-            expandedNodes: _data.expandedNodes[d] || []
+            expandedNodes: ((_data.expandedNodes && _data.expandedNodes[d]) ?
+                            _data.expandedNodes[d] : [])
         });
     }
 
