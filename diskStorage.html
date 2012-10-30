@@ -17,37 +17,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
     <head>
         <title>mongovis visualizer</title>
-        <script type="text/javascript" src="jquery.js"></script>
         <script type="text/javascript" src="d3.v2.js"></script>
-        <script type="text/javascript" src="underscore.js"></script>
-        <script type="text/javascript" src="diskStorage.js"></script>
+        <script type="text/javascript" src="base.js"></script>
+        <script type="text/javascript" src="boxPlot.js"></script>
+        <link rel="stylesheet" href="base.css" />
         <link rel="stylesheet" href="diskStorage.css" />
     </head>
     <body>
-      <label for="barWidth">chunk bar width (in px)</label>
-      <input type="text" id="barWidth" value="6"></input>
-      <label for="database">database</label>
-      <input type="text" id="database" value="test" style="width: 100px;"></input>
-      <label for="collection">collection</label>
-      <input type="text" id="collection" value="test" style="width: 100px;"></input>
-      <label for="allExtents">all extents</label>
-      <input type="checkbox" id="allExtents"></input>
-      <label for="extent">extent</label>
-      <input type="text" id="extent" value="0"></input>
-      <label for="granularity" >granularity</label>
-      <input type="text" id="granularity" value="1048576" style="width: 100px;"></input>
-      <label for="showRecords">show records</label>
-      <input type="checkbox" id="showRecords"></input>
-      <button id="query" onclick="handleLoad()">Load</button>
-      <button id="render" style="display: none;" onclick="handleRender()">Render</button>
-      <button id="clear" onclick="document.location.reload(true)">Clear</button>
-      <div id="requestUrl"></div>
-      <div id="queryJson"></div>
-      <div id="wrapper">
-        <div id="summaryGraphs"></div>
-        <div id="graphs"></div>
-        <div id="json" />
-        <div id="popup" />
-      </div>
+        <div id="container">
+            <div class="grid-tr">
+                <div id="header" class="grid-td">
+                    mongoDB :: collection.storageDetails({analyze: 'diskStorage'}) command (mongod should be started with --rest --jsonp)
+                </div>
+            </div>
+            <div class="grid-tr">
+                <div id="requestForm" class="grid-td">
+                </div>
+            </div>
+            <div class="grid-tr">
+                <div id="resultString" class="grid-td">
+                </div>
+            </div>
+            <div id="basicInfoRow" class="grid-tr">
+            </div>
+            <div class="grid-tr">
+                <div id="curNodeStats" class="grid-td grid-half"></div>
+                <div id="detailedStats" class="grid-td grid-half"></div>
+            </div>
+            <div class="grid-tr">
+                <div id="levels" class="grid-td">
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="diskStorage.js"></script>
     </body>
 </html>
+

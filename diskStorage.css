@@ -16,6 +16,7 @@
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
 body {
     font-family: sans-serif;
     font-size: 10px;
@@ -112,7 +113,6 @@ input[type=text] {
 div.extent {
     overflow: auto;
     white-space: nowrap;
-    /*background-color: #eee;*/
     border: 1px dashed #999;
     margin: 5px;
     padding: 5px;
@@ -140,4 +140,6 @@ div#popup {
     padding: 3px;
     opacity: 0.8;
 }
+
+*/
 
