@@ -32,8 +32,7 @@ base.tmpl = function Tmpl(str, data){
     // Figure out if we're getting a template, or if we need to
     // load the template - and be sure to cache the result.
     var fn = !/\W/.test(str) ?
-        cache[str] = cache[str] ||
-            Tmpl(document.getElementById(str).innerHTML) :
+        cache[str] = cache[str] :
 
         // Generate a reusable function that will serve as a template
         // generator (and which will be cached).
@@ -92,9 +91,12 @@ base.property = function(obj, name, default_) {
 
 base.fmt = {
     percent: function(val) { return val.toFixed(3) }, //d3.format('.3p'),
+    ratioToPercent: function(val) { return (val * 100).toFixed(1) + '%' },
     percentAndErr: function(val, err) {
         return this.percent(val) + ' (&plusmn;' + this.percent(err) + ')';
-    }
+    },
+    suffix: function(val) { return d3.format('.3s')(val) },
+    suffixAndBytes: function(val) { return base.fmt.suffix(val) + 'b (' + val + ' bytes)' }
 }
 
 base.fmt.stat = {

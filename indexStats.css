@@ -15,24 +15,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-.left-table-header {
-    width: 20px;
-    position: relative;
-}
-
-.left-table-header > span {
-    writing-mode: tb-rl;
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    margin-top: 30px;
-    white-space: nowrap;
-    display: block;
-    width: 20px;
-    height: 20px;
-    top: 30px;
-}
-
 .level-summary {
     width: 325px;
     min-width: 325px;

@@ -69,14 +69,43 @@ body {
     display: inline-block;
 }
 
-rect.bsonSize {
+*/
+#extentSummaryRow {
+    background: white;
+    z-index: 10;
+}
+
+#extentSummary {
+    padding: 10px;
+}
+
+.extentGraph {
+    overflow: auto;
+}
+
+.extentRow.highlighted > div:first-child {
+    background-color: #ffc;
+}
+
+rect.spaceUsageBar {
+    stroke: black;
+    fill: none;
+}
+                
+rect.bsonBytes {
     fill: #88f;
 }
 
-rect.recSize {
+rect.recBytes {
     fill: #bbf;
 }
 
+#infoBox table td {
+    padding-right: 15px;
+    text-align: right;
+}
+
+/*
 rect.freeRec {
     fill: #cfc;
 }

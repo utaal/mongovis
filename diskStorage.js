@@ -21,7 +21,7 @@
 var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_storageDetails=<%=collection%>" +
                    "&filter_analyze=diskStorage" +
                    "<%=(extent) ? '&filter_extent=' + extent : ''%>" +
-                   "<%=(granularity) ? '&filter_granularity=' + granularity : ''%>" +
+                   "<%=(granularity) ? '&filter_granularity=' + (granularity * 1024) : ''%>" +
                    "<%=(numberOfChunks) ? '&filter_numberOfChunks=' + numberOfChunks : ''%>";
 
 var REQUEST_FORM_FIELDS = [
@@ -29,7 +29,7 @@ var REQUEST_FORM_FIELDS = [
     { name: 'database', desc: 'db', type: 'text', default_: 'test' },
     { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
     { name: 'extent', desc: 'extent', type: 'text', default_: '' },
-    { name: 'granularity', desc: 'granularity', type: 'text', default_: '' },
+    { name: 'granularity', desc: 'granularity (Kb)', type: 'text', default_: '' },
     { name: 'numberOfChunks', desc: 'number of chunks', type: 'text', default_: '' }
 ]
 
@@ -41,6 +41,20 @@ function setUp() {
         var url = base.tmpl(URL_TEMPLATE, reqParams);
         d3.select('#resultString').text('fetching ' + url + '...');
         base.jsonp(url, 'handleData');
+    });
+
+    var $extentSummaryRow = d3.select('#extentSummaryRow');
+    var $spaceFiller = d3.select('#spaceFiller');
+    d3.select(window).on('scroll', function(a) {
+        if (window.scrollY > 85) {
+            $extentSummaryRow.style('position', 'fixed');
+            $extentSummaryRow.style('top', '0');
+            $spaceFiller.style('min-height', $extentSummaryRow.node().clientHeight);
+        } else {
+            $extentSummaryRow.style('position', null);
+            $extentSummaryRow.style('top', null);
+            $spaceFiller.style('min-height', null);
+        }
     });
 }
 
@@ -54,12 +68,168 @@ this.handleData = function handleData(data) {
                                     ', rendering');
     console.log(_data);
 
-    _data.keyPattern = JSON.stringify(_data.keyPattern);
     d3.select('#resultString').text('executed command ' + JSON.stringify(data.query));
 
     var basicInfoRow = d3.select('#basicInfoRow');
     basicInfoRow.selectAll('*').remove();
+
+    var SUMMARY_BAR_WIDTH = 20;
+    var BAR_HEIGHT = 120;
+    var BAR_WIDTH = 6;
+
+    var $extentSummary = d3.select('#extentSummary');
+    $extentSummary.selectAll('*').remove();
+    var $infoBox = d3.select('#infoBox');
+    $infoBox.selectAll('*').remove();
+    $infoBox.append('div').text('click on bars for details');
+
+    var updateInfoBox = function(datum) {
+        $infoBox.selectAll('*').remove();
+        $infoBox.datum(datum).call(infoBox());
+    };
+
+    if (_data.extents) {
+        $extentSummary.style('display', null);
+        d3.select('#extentSummaryHeader').style('display', null);
+        var summaryX = function(d, i) { return i * (SUMMARY_BAR_WIDTH + 10) };
+        $extentSummary
+            .append('svg')
+            .attr('width', summaryX(null, _data.extents.length))
+            .attr('height', BAR_HEIGHT + 1)
+            .selectAll('g')
+            .data(_data.extents)
+            .enter()
+            .append('svg:g')
+            .attr('transform', function(d, i) { return 'translate(' + summaryX(d, i) + ', 0)' })
+            .call(spaceUsageBar().width(SUMMARY_BAR_WIDTH).height(BAR_HEIGHT))
+            .on('click', function(datum, i) {
+                d3.selectAll('.extentRow')
+                    .classed('highlighted', false);
+                d3.select('.extentRow-' + i)
+                    .classed('highlighted', true)
+                    .node().scrollIntoView(false);
+                updateInfoBox(datum);
+            });
+
+        var extentRowEnter = d3.select('#container')
+            .selectAll('.extentRow')
+            .data(_data.extents)
+            .enter()
+            .append('div')
+            .attr('class', function(d, i) { return 'extentRow-' + i })
+            .classed('grid-tr extentRow', true);
+
+        extentRowEnter.append('div')
+            .classed('grid-td left-table-header', true)
+            .append('span')
+            .text(function(d, i) { return 'extent ' + (i + 1) });
+
+        var x = function(d, i) { return i * (BAR_WIDTH + 3) }
+        var extentGraphDiv = extentRowEnter.append('div')
+            .classed('grid-td extentGraph', true)
+            .append('svg')
+            .attr('width', function(d, i) {
+                return SUMMARY_BAR_WIDTH + 10 + x(null, d.chunks ? d.chunks.length : 0) + 2
+            })
+            .attr('height', BAR_HEIGHT + 1);
+
+        extentGraphDiv.selectAll('g.summaryBar')
+            .data(function(d) { return [d] })
+            .enter()
+            .append('svg:g')
+            .classed('summaryBar', true)
+            .call(spaceUsageBar().width(SUMMARY_BAR_WIDTH).height(BAR_HEIGHT))
+            .on('click', updateInfoBox);
+
+        extentGraphDiv
+            .append('g')
+            .attr('transform', 'translate(' + (SUMMARY_BAR_WIDTH + 10) + ', 0)')
+            .selectAll('g.chunkBar')
+            .data(function(d) { return (d.chunks ? d.chunks : []) })
+            .enter()
+            .append('svg:g')
+            .classed('chunkBar', true)
+            .attr('transform', function(d, i) { return 'translate(' + x(d, i) + ', 0)' })
+            .call(spaceUsageBar().width(BAR_WIDTH).height(BAR_HEIGHT))
+            .on('click', updateInfoBox);
+    }
 };
+
+function spaceUsageBar() {
+    // assumes datum has the form:
+    //      {
+    //        numEntries:
+    //        outOfOrderRecs:
+    //        onDiskBytes:
+    //        recBytes:
+    //        bsonBytes:
+    //        isCapped:
+    // (opt)  freeRecsPerBucket: [arr]
+    //      }
+
+    base.property(chart, 'width', 6);
+    base.property(chart, 'height', 100);
+
+    function chart(g) {
+        g.each(function(data) {
+            var g = d3.select(this);
+
+            var y = d3.scale.linear().domain([0, data.onDiskBytes]).range([chart._height, 0]);
+            var yHeight = d3.scale.linear().domain([0, data.onDiskBytes]).range([0, chart._height]);
+
+            g.append('rect')
+                .classed('spaceUsageBar', true)
+                .attr('height', chart._height)
+                .attr('width', chart._width);
+
+            g.selectAll('rect.recBytes')
+                .data([data.recBytes])
+                .enter().append('svg:rect')
+                .classed('recBytes', true)
+                .attr('y', y)
+                .attr('height', yHeight)
+                .attr('width', chart._width);
+
+            g.selectAll('rect.bsonBytes')
+                .data([data.bsonBytes])
+                .enter().append('svg:rect')
+                .classed('bsonBytes', true)
+                .attr('y', y)
+                .attr('height', yHeight)
+                .attr('width', chart._width);
+
+        });
+    }
+
+    return chart;
+}
+
+function infoBox() {
+
+    function chart(g) {
+        g.each(function(data) {
+            var g = d3.select(this);
+
+            var summaryTable = g.append('table');
+            [
+                ["size", "<%=base.fmt.ratioToPercent(1)%>",
+                 "<%=base.fmt.suffixAndBytes(onDiskBytes)%>"],
+                ["records", "", "<%=numEntries%>"],
+                ["record size", "<%=base.fmt.ratioToPercent(recBytes / onDiskBytes)%>",
+                 "<%=base.fmt.suffixAndBytes(recBytes)%>"],
+                ["bson size", "<%=base.fmt.ratioToPercent(bsonBytes / onDiskBytes)%>",
+                 "<%=base.fmt.suffixAndBytes(bsonBytes)%>"],
+                //["avg. charact.", "",
+                // "<%=typeof charactSum != 'undefined' ? (charactSum / charactCount) : 'n/a'%>"]
+            ].map(function(x) {
+                var row = summaryTable.append('tr');
+                x.map(function(d) { row.append('td').text(base.tmpl("<%=''%>" + d, data)) });
+            });
+        });
+    }
+
+    return chart;
+}
 
 setUp();
 
