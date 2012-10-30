@@ -105,6 +105,12 @@ rect.recBytes {
     text-align: right;
 }
 
+#legend .col {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+}
+
 /*
 rect.freeRec {
     fill: #cfc;

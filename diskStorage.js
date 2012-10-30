@@ -89,6 +89,7 @@ this.handleData = function handleData(data) {
 
     var $extentSummary = d3.select('#extentSummary');
     $extentSummary.selectAll('*').remove();
+    d3.select('#container').selectAll('.extentRow').remove();
     var $infoBox = d3.select('#infoBox');
     $infoBox.selectAll('*').remove();
     $infoBox.append('div').text('click on bars for details');
