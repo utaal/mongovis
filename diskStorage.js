@@ -20,7 +20,7 @@
 
 var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_storageDetails=<%=collection%>" +
                    "&filter_analyze=diskStorage" +
-                   "<%=(extent) ? '&filter_extent=' + extent : ''%>" +
+                   // "<%=(extent) ? '&filter_extent=' + extent : ''%>" +
                    "<%=(granularity) ? '&filter_granularity=' + (granularity * 1024) : ''%>" +
                    "<%=(numberOfChunks) ? '&filter_numberOfChunks=' + numberOfChunks : ''%>";
 
@@ -28,9 +28,9 @@ var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
     { name: 'database', desc: 'db', type: 'text', default_: 'test' },
     { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
-    { name: 'extent', desc: 'extent', type: 'text', default_: '' },
-    { name: 'granularity', desc: 'granularity (Kb)', type: 'text', default_: '' },
-    { name: 'numberOfChunks', desc: 'number of chunks', type: 'text', default_: '' }
+    // { name: 'extent', desc: 'extent (opt)', type: 'text', default_: '' },
+    { name: 'granularity', desc: 'granularity (Kb) (opt)', type: 'text', default_: '' },
+    { name: 'numberOfChunks', desc: 'number of chunks (opt)', type: 'text', default_: '' }
 ]
 
 function layoutHacks() {
