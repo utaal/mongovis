@@ -33,6 +33,13 @@ var REQUEST_FORM_FIELDS = [
     { name: 'numberOfChunks', desc: 'number of chunks', type: 'text', default_: '' }
 ]
 
+function layoutHacks() {
+    console.log('hacks');
+    d3.selectAll('.extentGraph')
+        .style('max-width', document.documentElement.clientWidth - 70);
+
+}
+
 function setUp() {
     var requestForm = d3.select('#requestForm');
     base.generateFormFields(requestForm, REQUEST_FORM_FIELDS, function() {
@@ -45,6 +52,7 @@ function setUp() {
 
     var $extentSummaryRow = d3.select('#extentSummaryRow');
     var $spaceFiller = d3.select('#spaceFiller');
+
     d3.select(window).on('scroll', function(a) {
         if (window.scrollY > 85) {
             $extentSummaryRow.style('position', 'fixed');
@@ -56,6 +64,8 @@ function setUp() {
             $spaceFiller.style('min-height', null);
         }
     });
+
+    d3.select(window).on('resize', layoutHacks);
 }
 
 this.handleData = function handleData(data) {
@@ -153,6 +163,8 @@ this.handleData = function handleData(data) {
             .call(spaceUsageBar().width(BAR_WIDTH).height(BAR_HEIGHT))
             .on('click', updateInfoBox);
     }
+
+    layoutHacks();
 };
 
 function spaceUsageBar() {
