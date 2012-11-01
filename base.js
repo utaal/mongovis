@@ -95,7 +95,15 @@ base.fmt = {
     percentAndErr: function(val, err) {
         return this.percent(val) + ' (&plusmn;' + this.percent(err) + ')';
     },
-    suffix: function(val) { return d3.format('.3s')(val) },
+    suffix: function(bytes) {
+        if( bytes < 1024 )
+            return Math.floor( bytes ) + "b";
+        if( bytes < 1024 * 1024 )
+            return Math.floor( bytes / 1024 ) + "kb";
+        if( bytes < 1024 * 1024 * 1024 )
+            return Math.floor( ( Math.floor( bytes / 1024 ) / 1024 ) * 100 ) / 100 + "Mb";
+       return Math.floor( ( Math.floor( bytes / ( 1024 * 1024 ) ) / 1024 ) * 100 ) / 100 + "Gb";
+    },
     suffixAndBytes: function(val) { return base.fmt.suffix(val) + 'b (' + val + ' bytes)' }
 }
 

@@ -15,12 +15,19 @@
 */
 
 div.extentSummary {
-    width: 50px;
+    width: 20px;
+    min-width: 20px;
+    max-width: 20px;
+}
+
+div.chunksGraph {
+    overflow: auto;
 }
 
 rect.border {
     fill: none;
     stroke: #777;
+    shape-rendering: crispEdges;
 }
 
 rect.inRAM {
@@ -28,7 +35,24 @@ rect.inRAM {
     stroke: none;
 }
 
+rect.chunk {
+    fill: #00f;
+    stroke: none;
+}
+
+path.frame {
+    stroke: black;
+    fill: none;
+    shape-rendering: crispEdges;
+}
+
 .axis path {
     fill: none;
     stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis line.tick {
+    stroke: black;
+    shape-rendering: crispEdges;
 }
