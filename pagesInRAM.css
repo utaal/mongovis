@@ -14,10 +14,11 @@
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-div.extentSummary {
-    width: 20px;
-    min-width: 20px;
-    max-width: 20px;
+div.extentChart {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+    text-align: center;
 }
 
 div.chunksGraph {
@@ -25,7 +26,7 @@ div.chunksGraph {
 }
 
 rect.border {
-    fill: none;
+    fill: white;
     stroke: #777;
     shape-rendering: crispEdges;
 }
@@ -55,4 +56,20 @@ path.frame {
 .axis line.tick {
     stroke: black;
     shape-rendering: crispEdges;
+}
+
+.extentRow.highlighted > div:first-child {
+    background-color: #ffc;
+}
+
+.extentSize {
+    margin-bottom: 5px;
+}
+
+.extentPercent {
+    margin-top: 5px;
+}
+
+#extentsSummary svg {
+    margin: 10px;
 }

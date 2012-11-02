@@ -29,7 +29,7 @@ var REQUEST_FORM_FIELDS = [
     { name: 'database', desc: 'db', type: 'text', default_: 'test' },
     { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
     // { name: 'extent', desc: 'extent (opt)', type: 'text', default_: '' },
-    { name: 'granularity', desc: 'granularity (Kb) (opt)', type: 'text', default_: '' },
+    { name: 'granularity', desc: 'granularity (Kb) (opt)', type: 'text', default_: '2048' },
     { name: 'numberOfChunks', desc: 'number of chunks (opt)', type: 'text', default_: '' }
 ]
 
@@ -111,6 +111,7 @@ this.handleData = function handleData(data) {
             .data(_data.extents)
             .enter()
             .append('svg:g')
+            .classed('summaryBar', true)
             .attr('transform', function(d, i) { return 'translate(' + summaryX(d, i) + ', 0)' })
             .call(spaceUsageBar().width(SUMMARY_BAR_WIDTH).height(BAR_HEIGHT))
             .on('click', function(datum, i) {
@@ -135,40 +136,93 @@ this.handleData = function handleData(data) {
             .append('span')
             .text(function(d, i) { return 'extent ' + (i + 1) });
 
-        var x = function(d, i) { return i * (BAR_WIDTH + 3) }
-        var extentGraphDiv = extentRowEnter.append('div')
-            .classed('grid-td extentGraph', true)
-            .append('svg')
-            .attr('width', function(d, i) {
-                return SUMMARY_BAR_WIDTH + 10 + x(null, d.chunks ? d.chunks.length : 0) + 2
-            })
-            .attr('height', BAR_HEIGHT + 1);
-
-        extentGraphDiv.selectAll('g.summaryBar')
+        var extentSummary = extentRowEnter.append('div')
+            .classed('grid-td extentSummary', true);
+        
+        extentSummary.selectAll('div.onDiskBytes')
+            .data(function(d) { return [d] })
+            .enter()
+            .append('div')
+            .classed('onDiskBytes', true)
+            .text(function(d) { return base.fmt.suffix(d.onDiskBytes) });
+            
+        extentSummary.append('svg')
+            .attr('width', SUMMARY_BAR_WIDTH + 2)
+            .attr('height', BAR_HEIGHT + 1)
+            .selectAll('g.summaryBar')
             .data(function(d) { return [d] })
             .enter()
             .append('svg:g')
             .classed('summaryBar', true)
             .call(spaceUsageBar().width(SUMMARY_BAR_WIDTH).height(BAR_HEIGHT))
             .on('click', updateInfoBox);
-
-        extentGraphDiv
+        
+        extentRowEnter.append('div')
+            .classed('grid-td extentGraph', true)
+            .append('svg')
+            .attr('width', function(d, i) {
+                return (d.chunks ? d.chunks.length : 0) * BAR_WIDTH + 40;
+            })
+            .attr('height', BAR_HEIGHT + 20)
             .append('g')
-            .attr('transform', 'translate(' + (SUMMARY_BAR_WIDTH + 10) + ', 0)')
-            .selectAll('g.chunkBar')
-            .data(function(d) { return (d.chunks ? d.chunks : []) })
-            .enter()
-            .append('svg:g')
-            .classed('chunkBar', true)
-            .attr('transform', function(d, i) { return 'translate(' + x(d, i) + ', 0)' })
-            .call(spaceUsageBar().width(BAR_WIDTH).height(BAR_HEIGHT))
-            .on('click', updateInfoBox);
+            .attr('transform', 'translate(10, 0)')
+            .call(chunksUsagePlot().chunkWidth(BAR_WIDTH)
+                                   .height(BAR_HEIGHT)
+                                   .onClick(updateInfoBox));
     } else {
         d3.select('#resultString').text('single extent mode is not supported yet');
     }
 
     layoutHacks();
 };
+
+function chunksUsagePlot() {
+
+    base.property(chart, 'chunkWidth', 10);
+    base.property(chart, 'height', 80);
+    base.property(chart, 'onClick', function() {});
+
+    function chart(g) {
+        g.each(function(data) {
+            var g = d3.select(this);
+
+            if (!data.chunks) {
+                return;
+            }
+
+            var length = data.chunks.length;
+
+            var x = d3.scale.linear().domain([0, length]).range([0, length * chart._chunkWidth]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .tickValues(d3.range(0, data.chunks.length, 16))
+                .tickFormat(function(d) { return base.fmt.suffix(d * data.chunks[0].onDiskBytes) })
+                .orient('bottom');
+
+            g.append('g')
+                .attr('transform', 'translate(0, ' + chart._height + ')')
+                .classed('x axis', true)
+                .call(xAxis);
+
+            g.selectAll('g.chunkBar')
+                .data(function(d) { return (d.chunks ? d.chunks : []) })
+                .enter()
+                .append('svg:g')
+                .classed('chunkBar', true)
+                .attr('transform', function(d, i) { return 'translate(' + x(i) + ', 0)' })
+                .call(spaceUsageBar().width(chart._chunkWidth - 1).height(chart._height))
+                .on('click', chart._onClick);
+
+            g.append('svg:path')
+                .classed('frame', true)
+                .attr('d', 'M0,' + chart._height + 'V0' + 'h' + x(length) + 'v' + chart._height);
+
+        });
+    }
+
+    return chart;
+}
 
 function spaceUsageBar() {
     // assumes datum has the form:
@@ -211,6 +265,11 @@ function spaceUsageBar() {
                 .classed('bsonBytes', true)
                 .attr('y', y)
                 .attr('height', yHeight)
+                .attr('width', chart._width);
+
+            g.append('rect')
+                .classed('border', true)
+                .attr('height', chart._height)
                 .attr('width', chart._width);
 
         });

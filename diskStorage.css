@@ -16,60 +16,6 @@
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-body {
-    font-family: sans-serif;
-    font-size: 10px;
-}
-
-#wrapper {
-    padding-right: 150px;
-    padding-bottom: 200px;
-}
-
-.extent-chart {
-    display: block;
-}
-
-.extent-recs {
-  overflow: auto;
-}
-
-
-.extent-recs > svg {
-    border: 1px solid black;
-}
-
-.extent-chart-usage {
-    border: 1px solid black;
-}
-
-.extent-chart-charact,
-.extent-chart-avgsize {
-    margin-left: 1px;
-}
-
-.extent-chart rect {
-}
-
-.extent-summary {
-    margin-right: 2px;
-}
-
-#summaryGraphs {
-    overflow: auto;
-    white-space: nowrap;
-    margin: 5px;
-    padding: 10px;
-    background-color: #eee;
-}
-
-#summaryGraphs div {
-    vertical-align: top;
-    display: inline-block;
-}
-
-*/
 #extentSummaryRow {
     background: white;
     z-index: 10;
@@ -88,8 +34,7 @@ body {
 }
 
 rect.spaceUsageBar {
-    stroke: black;
-    fill: none;
+    fill: white;
 }
                 
 rect.bsonBytes {
@@ -111,70 +56,39 @@ rect.recBytes {
     height: 10px;
 }
 
-/*
-rect.freeRec {
-    fill: #cfc;
-}
-
-rect.avgSize {
-    fill: green;
-}
-
-rect.delRec {
-    fill: #aaa;
+.axis path {
+    fill: none;
     stroke: black;
+    shape-rendering: crispEdges;
 }
 
-rect.charact {
-    fill: #bbb;
-}
-
-rect.graph-line {
+.axis line {
     stroke: black;
+    shape-rendering: crispEdges;
 }
 
-rect.missing-datum {
-    fill: #f77;
+path.frame {
+    stroke: black;
+    fill: none;
+    shape-rendering: crispEdges;
 }
 
-rect.record {
-    stroke: #fff;
+.extentSummary {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+    text-align: center;
 }
 
-input[type=text] {
-    width: 40px;
+rect.border {
+    fill: none;
 }
 
-div.extent {
-    overflow: auto;
-    white-space: nowrap;
-    border: 1px dashed #999;
-    margin: 5px;
-    padding: 5px;
-    display: inline-block;
-    margin-right: 15px;
+.summaryBar rect.border {
+    stroke: black;
+    shape-rendering: crispEdges;
 }
 
-div.extent > div {
-    display: inline-block;
+.onDiskBytes {
+    margin-bottom: 5px;
 }
-
-div.extent-desc,
-div.coll-desc {
-    min-width: 100px;
-    display: inline-block;
-    vertical-align: top;
-    padding: 5px;
-    margin-right: 5px;
-}
-
-div#popup {
-    position: absolute;
-    background-color: white;
-    border: 1px solid blue;
-    padding: 3px;
-    opacity: 0.8;
-}
-
-*/
-

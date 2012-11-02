@@ -34,9 +34,8 @@ var REQUEST_FORM_FIELDS = [
 ]
 
 function layoutHacks() {
-    console.log('hacks');
     d3.selectAll('.chunksGraph')
-        .style('max-width', window.document.documentElement.clientWidth - 110);
+        .style('max-width', window.document.documentElement.clientWidth - 150);
 }
 
 function setUp() {
@@ -48,9 +47,6 @@ function setUp() {
         d3.select('#resultString').text('fetching ' + url + '...');
         base.jsonp(url, 'handleData');
     });
-
-    var $extentSummaryRow = d3.select('#extentSummaryRow');
-    var $spaceFiller = d3.select('#spaceFiller');
 
     d3.select(window).on('resize', layoutHacks);
 }
@@ -67,9 +63,12 @@ this.handleData = function handleData(data) {
 
     d3.select('#resultString').text('executed command ' + JSON.stringify(data.query));
 
+    var $extentsSummaryRow = d3.select('#extentsSummaryRow').style('display', 'none');
+    var $extentsSummary = d3.select('#extentsSummary');
+    $extentsSummary.selectAll('*').remove();
+
     var basicInfoRow = d3.select('#basicInfoRow');
     basicInfoRow.selectAll('*').remove();
-
     d3.selectAll('.extentRow').remove();
 
     var SUMMARY_BAR_WIDTH = 20;
@@ -77,6 +76,44 @@ this.handleData = function handleData(data) {
     var BAR_WIDTH = 4;
 
     if (_data.extents) {
+        $extentsSummaryRow.style('display', null);
+
+        basicInfoRow.append('div')
+            .classed('grid-td', true)
+            .html('page size: ' + base.fmt.suffix(_data.extents[0].pageBytes));
+        basicInfoRow.append('div')
+            .classed('grid-td', true)
+            .html('each bar in summary refers to the ratio of pages in ram for an extent, ' +
+                  'click on them to find the detailed view for the extent');
+
+
+        var summaryX = function(d, i) { return (SUMMARY_BAR_WIDTH + 10) * i };
+
+        $extentsSummary.append('svg')
+            .attr('width', summaryX(null, _data.extents.length) + 1)
+            .attr('height', BAR_HEIGHT + 20)
+            .selectAll('g.extent')
+            .data(_data.extents)
+            .enter()
+            .append('svg:g')
+            .attr('width', SUMMARY_BAR_WIDTH)
+            .attr('height', BAR_HEIGHT)
+            .classed('extent', true)
+            .attr('transform', function(d, i) { return 'translate(' + summaryX(d, i) + ', 0)' })
+            .call(summaryBar().width(SUMMARY_BAR_WIDTH).height(BAR_HEIGHT))
+            .on('click', function(datum, i) {
+                d3.selectAll('.extentRow')
+                    .classed('highlighted', false);
+                d3.select('.extentRow-' + i)
+                    .classed('highlighted', true)
+                    .node().scrollIntoView();
+            })
+            .append('svg:text')
+            .attr('x', SUMMARY_BAR_WIDTH / 2)
+            .attr('y', BAR_HEIGHT + 15)
+            .style('text-anchor', 'middle')
+            .text(function(d, i) { return '' + (i + 1) });
+        
         var extentRowEnter = d3.select('#container')
             .selectAll('.extentRow')
             .data(_data.extents)
@@ -90,28 +127,21 @@ this.handleData = function handleData(data) {
             .append('span')
             .text(function(d, i) { return 'extent ' + (i + 1) });
 
-        var extentSummarySvg = extentRowEnter.append('div')
-            .classed('grid-td extentSummary', true)
-            .append('svg')
+        var extentChartDiv = extentRowEnter.append('div')
+            .classed('grid-td extentChart', true);
+
+        extentChartDiv.append('div')
+            .classed('extentSize', true)
+            .text(function(d, i) { return base.fmt.suffix(d.onDiskBytes) });
+
+        extentChartDiv.append('svg')
             .attr('width', SUMMARY_BAR_WIDTH + 1)
-            .attr('height', BAR_HEIGHT + 1);
+            .attr('height', BAR_HEIGHT + 1)
+            .call(summaryBar().width(SUMMARY_BAR_WIDTH).height(BAR_HEIGHT));
 
-        extentSummarySvg.append('rect')
-            .classed('border', true)
-            .attr('width', SUMMARY_BAR_WIDTH)
-            .attr('height', BAR_HEIGHT);
-
-        var summaryY = d3.scale.linear().domain([0, 1]).range([BAR_HEIGHT, 0]);
-        var summaryHeight = summaryY.copy().range([0, BAR_HEIGHT]);
-
-        extentSummarySvg.selectAll('rect.inRAM')
-            .data(function(d, i) { return [d.inMem] })
-            .enter()
-            .append('rect')
-            .classed('inRAM', true)
-            .attr('width', SUMMARY_BAR_WIDTH)
-            .attr('height', summaryHeight)
-            .attr('y', summaryY);
+        extentChartDiv.append('div')
+            .classed('extentPercent', true)
+            .text(function(d, i) { return base.fmt.ratioToPercent(d.inMem) });
 
         extentRowEnter.append('div')
             .classed('grid-td chunksGraph', true)
@@ -132,6 +162,37 @@ this.handleData = function handleData(data) {
     layoutHacks();
 };
 
+function summaryBar() {
+
+    base.property(chart, 'width', 20);
+    base.property(chart, 'height', 80);
+
+    function chart(g) {
+        g.each(function(data) {
+            var g = d3.select(this);
+
+            g.append('rect')
+                .classed('border', true)
+                .attr('width', chart._width)
+                .attr('height', chart._height);
+
+            var summaryY = d3.scale.linear().domain([0, 1]).range([chart._height, 0]);
+            var summaryHeight = summaryY.copy().range([0, chart._height]);
+
+            g.selectAll('rect.inRAM')
+                .data(function(d, i) { return [d.inMem] })
+                .enter()
+                .append('rect')
+                .classed('inRAM', true)
+                .attr('width', chart._width)
+                .attr('height', summaryHeight)
+                .attr('y', summaryY);
+        });
+    }
+
+    return chart;
+}
+
 function chunksInRAMPlot() {
 
     base.property(chart, 'chunkWidth', 2);
@@ -140,14 +201,12 @@ function chunksInRAMPlot() {
     function chart(g) {
         g.each(function(data) {
             var g = d3.select(this);
-            console.log(data);
 
             if (!data.chunks) {
                 return;
             }
 
             var length = data.chunks.length;
-            console.log(length);
 
             var x = d3.scale.linear().domain([0, length]).range([0, length * chart._chunkWidth]);
 
@@ -163,10 +222,6 @@ function chunksInRAMPlot() {
                 .classed('x axis', true)
                 .call(xAxis);
 
-            g.append('svg:path')
-                .classed('frame', true)
-                .attr('d', 'M0,' + chart._height + 'V0' + 'h' + x(length) + 'v' + chart._height);
-
             var y = d3.scale.linear().domain([0, 1]).range([chart._height, 0]);
             var height = y.copy().range([0, chart._height]);
 
@@ -179,6 +234,11 @@ function chunksInRAMPlot() {
                 .attr('width', chart._chunkWidth)
                 .attr('y', y)
                 .attr('height', height);
+
+            g.append('svg:path')
+                .classed('frame', true)
+                .attr('d', 'M0,' + chart._height + 'V0' + 'h' + x(length) + 'v' + chart._height);
+
         });
     }
 

@@ -104,7 +104,7 @@ base.fmt = {
             return Math.floor( ( Math.floor( bytes / 1024 ) / 1024 ) * 100 ) / 100 + "Mb";
        return Math.floor( ( Math.floor( bytes / ( 1024 * 1024 ) ) / 1024 ) * 100 ) / 100 + "Gb";
     },
-    suffixAndBytes: function(val) { return base.fmt.suffix(val) + 'b (' + val + ' bytes)' }
+    suffixAndBytes: function(val) { return base.fmt.suffix(val) + ' (' + val + ' bytes)' }
 }
 
 base.fmt.stat = {
