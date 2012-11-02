@@ -22,8 +22,8 @@ var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_indexStats=<%=co
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
-    { name: 'database', desc: 'db', type: 'text', default_: 'random' },
-    { name: 'collection', desc: 'collection', type: 'text', default_: 'random' },
+    { name: 'database', desc: 'db', type: 'text', default_: 'test' },
+    { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
     { name: 'index', desc: 'index', type: 'text', default_: '_id_' },
     { name: 'expandNodes', desc: 'expand nodes (e.g. 0,2,3)', type: 'text', default_: '0' }
 ]
