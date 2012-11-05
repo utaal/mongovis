@@ -41,14 +41,32 @@ function boxChart() {
         g.each(function(data) {
             var g = d3.select(this);
 
+            if (data.count == 0) {
+                return;
+            }
+
             // Compute the new x-scale.
             var domain = chart._domain || [data.min, data.max];
             var width = chart._width;
             var height = chart._height;
-            var x = chart._scale || d3.scale.linear().domain(domain).range([0, width]).nice().clamp(true);
-
-            // Compute the tick format.
-            var format = x.tickFormat(8);
+            var x = null;
+            var ticks = null;
+            if (data.min < data.max) {
+                x = chart._scale || d3.scale.linear()
+                                            .domain(domain)
+                                            .range([0, width])
+                                            .nice()
+                                            .clamp(true);
+                ticks = x.ticks(6);
+            } else {
+                x = d3.scale.linear()
+                            .domain([Math.floor(data.min - data.min / 100),
+                                     Math.ceil(data.max + data.max / 100)])
+                            .range([0, width])
+                            .nice()
+                            .clamp(true);
+                ticks = x.ticks(3);
+            }
 
             // Update ticks
             // var boxTick = g.selectAll("text.box").data(x.ticks(8));
@@ -75,7 +93,8 @@ function boxChart() {
             if (chart._showAxis) {
                 var xAxis = d3.svg.axis()
                     .scale(x)
-                    .tickValues(x.ticks(8))
+                    .tickValues(ticks)
+                    .tickSubdivide(1)
                     .orient("bottom");
 
                 g.append("g")
@@ -131,7 +150,7 @@ function boxChart() {
                     .attr("y2", height)
                     .attr("x2", x);
 
-                var median = g.selectAll("path.median").data([data.median]);
+                var median = g.selectAll("path.median").data([data.quantiles[.5]]);
 
                 median.enter().append("svg:path")
                     .classed("median", true)
@@ -148,12 +167,14 @@ function boxChart() {
                     .attr("x2", x);
             }
 
+            if (data.stddev > 0) {
                 var stddev = g.selectAll("line.stddev")
                     .data([[data.mean - data.stddev, data.mean + data.stddev]]);
 
                 stddev.enter().append("svg:path")
                     .classed("stddev", true)
                     .attr("d", function(d) { return "M" + x(d[0]) + ",6" + "v-6" + "H" + x(d[1]) + "v6" });
+            }
 
             var mean = g.selectAll("path.mean").data([data.mean]);
 

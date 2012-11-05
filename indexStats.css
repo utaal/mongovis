@@ -34,6 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     margin-right: 12px;
 }
 
+.expanded-header {
+    border-bottom: 1px dashed #bbb;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
 /* --- BOX-PLOT --- */
 .boxplot { font: 10px sans-serif; }
 .boxplot line.whisker, line.center, line.median, .boxplot rect.box, .boxplot circle { stroke: #000; fill: #fff; }

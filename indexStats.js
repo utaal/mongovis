@@ -77,7 +77,9 @@ this.handleData = function handleData(data) {
         // generate calculated data fields
     });
 
-    d3.select('#curNodeStats').datum(_data.overall).call(statsDisplay().big(true));
+    var $curNodeStats = d3.select('#curNodeStats');
+    $curNodeStats.selectAll('*').remove();
+    $curNodeStats.datum(_data.overall).call(statsDisplay().big(true));
 
     var levelAndExpandedData = [];
     for (var d = 0; d < _data.perLevel.length; ++d) {
@@ -115,9 +117,42 @@ this.handleData = function handleData(data) {
         .enter()
         .append('div')
         .classed('expanded-node', true)
-        .call(statsDisplay().big(false).width(280));
+        .call(expandedDisplay());
 
     layoutHacks();
+}
+
+function expandedDisplay() {
+    function chart(selection) {
+        selection.each(function(data) {
+            var $this = d3.select(this);
+            $this.selectAll('*').remove();
+
+            if (!data.nodeInfo) {
+                $this.append('div').text('empty child');
+                return;
+            }
+
+            var htmlTemplate = 'child #<b><%=childNum%></b>, <b><%=keyCount%></b> keys ' +
+                               '(<b><%=usedKeyCount%></b> used)';
+            if (data.nodeInfo.firstKey) {
+                htmlTemplate += '<br/><%=JSON.stringify(firstKey)%> '
+            }
+            if (data.nodeInfo.lastKey) {
+                htmlTemplate += '<br/>--&gt; <%=JSON.stringify(lastKey)%>';
+            }
+
+            $this.append('div')
+                .classed('expanded-header', true)
+                .html(base.tmpl(htmlTemplate, data.nodeInfo));
+
+            $this.append('div').text('subtree stats');
+            $this.append('div')
+                .call(statsDisplay().big(false).width(280));
+        });
+    }
+
+    return chart;
 }
 
 function statsDisplay() {
@@ -125,7 +160,10 @@ function statsDisplay() {
     function chart(selection) {
         selection.each(function(data) {
             var $this = d3.select(this);
-            $this.selectAll('*').remove();
+            if (data.numBuckets == 0) {
+                $this.append('div').html('<b>0</b> buckets');
+                return;
+            }
             $this.append('div').html(base.tmpl(
                 '<b><%=numBuckets%></b> buckets' +
                 ', on average <b><%=base.fmt.stat.percentAndErr(fillRatio)%></b> full' +
