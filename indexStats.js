@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (function() {
 
 var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_indexStats=<%=collection%>" +
-                   "&filter_name=<%=index%>&filter_arr_expandNodes=<%=expandNodes%>";
+                   "&filter_index=<%=index%>&filter_arr_expandNodes=<%=expandNodes%>";
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },

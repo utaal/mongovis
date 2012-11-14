@@ -283,8 +283,10 @@ function infoBox() {
     function chart(g) {
         g.each(function(data) {
             var g = d3.select(this);
+            g.style('vertical-align', 'top');
 
-            var summaryTable = g.append('table');
+            var summaryTable = g.append('table').style('display', 'inline-block');
+            summaryTable.style('vertical-align', 'top');
             [
                 ["size", "<%=base.fmt.ratioToPercent(1)%>",
                  "<%=base.fmt.suffixAndBytes(onDiskBytes)%>"],
@@ -292,13 +294,30 @@ function infoBox() {
                 ["record size", "<%=base.fmt.ratioToPercent(recBytes / onDiskBytes)%>",
                  "<%=base.fmt.suffixAndBytes(recBytes)%>"],
                 ["bson size", "<%=base.fmt.ratioToPercent(bsonBytes / onDiskBytes)%>",
-                 "<%=base.fmt.suffixAndBytes(bsonBytes)%>"],
-                ["avg. charact.", "",
-                 "<%=typeof characteristicAvg != 'undefined' ? characteristicAvg.toFixed(3) : 'n/a'%>"]
+                 "<%=base.fmt.suffixAndBytes(bsonBytes)%>"]
             ].map(function(x) {
                 var row = summaryTable.append('tr');
                 x.map(function(d) { row.append('td').text(base.tmpl("<%=''%>" + d, data)) });
             });
+
+            var delRecDiv = g.append('div').style('display', 'inline-block');
+            delRecDiv.style('border', '1px solid #aaa');
+            delRecDiv.append('span').style('text-align', 'center')
+                .style('font-weight', 'bold').text('deleted records');
+            delRecDiv.append('br');
+            var i = 0;
+            data.freeRecsPerBucket.map(function(x) {
+                var ddd = delRecDiv.append('div')
+                    .style('display', 'inline-block')
+                    .style('padding', '5px');
+                ddd.append('span').text(base.fmt.suffix(Math.pow(2, i + 5)) + ": ");
+                ddd.append('span').text(x);
+                i++;
+                if (i % 5 == 0) {
+                    delRecDiv.append('br');
+                }
+            });
+            row.append('td').text('a');
         });
     }
 
