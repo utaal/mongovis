@@ -22,7 +22,7 @@ var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_storageDetails=<
                    "&filter_analyze=diskStorage" +
                    // "<%=(extent) ? '&filter_extent=' + extent : ''%>" +
                    "<%=(granularity) ? '&filter_granularity=' + (granularity * 1024) : ''%>" +
-                   "<%=(numberOfChunks) ? '&filter_numberOfChunks=' + numberOfChunks : ''%>";
+                   "<%=(numberOfSlices) ? '&filter_numberOfSlices=' + numberOfSlices : ''%>";
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
@@ -30,7 +30,7 @@ var REQUEST_FORM_FIELDS = [
     { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
     // { name: 'extent', desc: 'extent (opt)', type: 'text', default_: '' },
     { name: 'granularity', desc: 'granularity (Kb) (opt)', type: 'text', default_: '2048' },
-    { name: 'numberOfChunks', desc: 'number of chunks (opt)', type: 'text', default_: '' }
+    { name: 'numberOfSlices', desc: 'number of slices (opt)', type: 'text', default_: '' }
 ]
 
 function layoutHacks() {
@@ -161,12 +161,12 @@ this.handleData = function handleData(data) {
             .classed('grid-td extentGraph', true)
             .append('svg')
             .attr('width', function(d, i) {
-                return (d.chunks ? d.chunks.length : 0) * BAR_WIDTH + 40;
+                return (d.slices ? d.slices.length : 0) * BAR_WIDTH + 40;
             })
             .attr('height', BAR_HEIGHT + 20)
             .append('g')
             .attr('transform', 'translate(10, 0)')
-            .call(chunksUsagePlot().chunkWidth(BAR_WIDTH)
+            .call(slicesUsagePlot().sliceWidth(BAR_WIDTH)
                                    .height(BAR_HEIGHT)
                                    .onClick(updateInfoBox));
     } else {
@@ -176,9 +176,9 @@ this.handleData = function handleData(data) {
     layoutHacks();
 };
 
-function chunksUsagePlot() {
+function slicesUsagePlot() {
 
-    base.property(chart, 'chunkWidth', 10);
+    base.property(chart, 'sliceWidth', 10);
     base.property(chart, 'height', 80);
     base.property(chart, 'onClick', function() {});
 
@@ -186,18 +186,18 @@ function chunksUsagePlot() {
         g.each(function(data) {
             var g = d3.select(this);
 
-            if (!data.chunks) {
+            if (!data.slices) {
                 return;
             }
 
-            var length = data.chunks.length;
+            var length = data.slices.length;
 
-            var x = d3.scale.linear().domain([0, length]).range([0, length * chart._chunkWidth]);
+            var x = d3.scale.linear().domain([0, length]).range([0, length * chart._sliceWidth]);
 
             var xAxis = d3.svg.axis()
                 .scale(x)
-                .tickValues(d3.range(0, data.chunks.length, 16))
-                .tickFormat(function(d) { return base.fmt.suffix(d * data.chunks[0].onDiskBytes) })
+                .tickValues(d3.range(0, data.slices.length, 16))
+                .tickFormat(function(d) { return base.fmt.suffix(d * data.slices[0].onDiskBytes) })
                 .orient('bottom');
 
             g.append('g')
@@ -205,13 +205,13 @@ function chunksUsagePlot() {
                 .classed('x axis', true)
                 .call(xAxis);
 
-            g.selectAll('g.chunkBar')
-                .data(function(d) { return (d.chunks ? d.chunks : []) })
+            g.selectAll('g.sliceBar')
+                .data(function(d) { return (d.slices ? d.slices : []) })
                 .enter()
                 .append('svg:g')
-                .classed('chunkBar', true)
+                .classed('sliceBar', true)
                 .attr('transform', function(d, i) { return 'translate(' + x(i) + ', 0)' })
-                .call(spaceUsageBar().width(chart._chunkWidth - 1).height(chart._height))
+                .call(spaceUsageBar().width(chart._sliceWidth - 1).height(chart._height))
                 .on('click', chart._onClick);
 
             g.append('svg:path')

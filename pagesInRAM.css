@@ -21,7 +21,7 @@ div.extentChart {
     text-align: center;
 }
 
-div.chunksGraph {
+div.slicesGraph {
     overflow: auto;
 }
 
@@ -36,7 +36,7 @@ rect.inRAM {
     stroke: none;
 }
 
-rect.chunk {
+rect.slice {
     fill: #00f;
     stroke: none;
 }

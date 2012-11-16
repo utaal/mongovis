@@ -22,7 +22,7 @@ var URL_TEMPLATE = "http://<%=host%>/<%=database%>/$cmd/?filter_storageDetails=<
                    "&filter_analyze=pagesInRAM" +
                    // "<%=(extent) ? '&filter_extent=' + extent : ''%>" +
                    "<%=(granularity) ? '&filter_granularity=' + (granularity * 1024) : ''%>" +
-                   "<%=(numberOfChunks) ? '&filter_numberOfChunks=' + numberOfChunks : ''%>";
+                   "<%=(numberOfSlices) ? '&filter_numberOfSlices=' + numberOfSlices : ''%>";
 
 var REQUEST_FORM_FIELDS = [
     { name: 'host', desc: 'host', type: 'text', default_: 'localhost:28017' },
@@ -30,11 +30,11 @@ var REQUEST_FORM_FIELDS = [
     { name: 'collection', desc: 'collection', type: 'text', default_: 'test' },
     // { name: 'extent', desc: 'extent (opt)', type: 'text', default_: '' },
     { name: 'granularity', desc: 'granularity (Kb) (opt)', type: 'text', default_: '20' },
-    { name: 'numberOfChunks', desc: 'number of chunks (opt)', type: 'text', default_: '' }
+    { name: 'numberOfSlices', desc: 'number of slices (opt)', type: 'text', default_: '' }
 ]
 
 function layoutHacks() {
-    d3.selectAll('.chunksGraph')
+    d3.selectAll('.slicesGraph')
         .style('max-width', window.document.documentElement.clientWidth - 150);
 }
 
@@ -144,15 +144,15 @@ this.handleData = function handleData(data) {
             .text(function(d, i) { return base.fmt.ratioToPercent(d.inMem) });
 
         extentRowEnter.append('div')
-            .classed('grid-td chunksGraph', true)
+            .classed('grid-td slicesGraph', true)
             .append('svg')
             .attr('height', BAR_HEIGHT + 30)
             .attr('width', function(d) {
-                return d.chunks ? d.chunks.length * BAR_WIDTH + 20 : 0
+                return d.slices ? d.slices.length * BAR_WIDTH + 20 : 0
             })
             .append('g')
             .attr('transform', 'translate(10, 0)')
-            .call(chunksInRAMPlot().chunkWidth(BAR_WIDTH).height(BAR_HEIGHT));
+            .call(slicesInRAMPlot().sliceWidth(BAR_WIDTH).height(BAR_HEIGHT));
 
 
     } else {
@@ -193,28 +193,28 @@ function summaryBar() {
     return chart;
 }
 
-function chunksInRAMPlot() {
+function slicesInRAMPlot() {
 
-    base.property(chart, 'chunkWidth', 2);
+    base.property(chart, 'sliceWidth', 2);
     base.property(chart, 'height', 80);
 
     function chart(g) {
         g.each(function(data) {
             var g = d3.select(this);
 
-            if (!data.chunks) {
+            if (!data.slices) {
                 return;
             }
 
-            var length = data.chunks.length;
+            var length = data.slices.length;
 
-            var x = d3.scale.linear().domain([0, length]).range([0, length * chart._chunkWidth]);
+            var x = d3.scale.linear().domain([0, length]).range([0, length * chart._sliceWidth]);
 
             var xAxis = d3.svg.axis()
                 .scale(x)
-                .tickValues(d3.range(0, data.chunks.length, 16))
+                .tickValues(d3.range(0, data.slices.length, 16))
                 .tickSubdivide(1)
-                .tickFormat(function(d) { return base.fmt.suffix(d * data.chunkBytes) })
+                .tickFormat(function(d) { return base.fmt.suffix(d * data.sliceBytes) })
                 .orient('bottom');
 
             g.append('g')
@@ -225,13 +225,13 @@ function chunksInRAMPlot() {
             var y = d3.scale.linear().domain([0, 1]).range([chart._height, 0]);
             var height = y.copy().range([0, chart._height]);
 
-            g.selectAll('rect.chunk')
-                .data(function(d, i) { return d.chunks })
+            g.selectAll('rect.slice')
+                .data(function(d, i) { return d.slices })
                 .enter()
                 .append('rect')
-                .classed('chunk', true)
+                .classed('slice', true)
                 .attr('x', function(d, i) { return x(i) })
-                .attr('width', chart._chunkWidth)
+                .attr('width', chart._sliceWidth)
                 .attr('y', y)
                 .attr('height', height);
 
